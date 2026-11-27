@@ -37,18 +37,25 @@ export const BackgroundBackdrop: React.FC<BackgroundBackdropProps> = React.memo(
       ? skin.backdropImageUrl || defaultImageUrl
       : levelSetting?.customImageDataUrl || defaultImageUrl;
 
+    // Keep full-transformation menus razor sharp instead of muddy blurred/blacked-out
     const dimPct =
-      forceDimPct !== undefined
+      useSkinScene && preferSkinBackdrop
+        ? 26
+        : forceDimPct !== undefined
         ? forceDimPct
         : useSkinScene
-        ? 36
+        ? 44
         : levelSetting?.dimPct ?? 64;
     const blurPx =
-      forceBlurPx !== undefined
+      useSkinScene && preferSkinBackdrop
+        ? 0
+        : forceBlurPx !== undefined
         ? forceBlurPx
         : useSkinScene
         ? 0
         : levelSetting?.blurPx ?? 3;
+
+    const isChristmas = themeId === 'cozy_christmas_2026';
 
     return (
       <div
@@ -73,16 +80,31 @@ export const BackgroundBackdrop: React.FC<BackgroundBackdropProps> = React.memo(
           />
         )}
 
-        {/* Measured readability scrim */}
+        {/* Measured readability scrim: bright clear sky + diorama center, gentle edge vignette */}
         <div
           className="absolute inset-0 transition-opacity duration-200"
           style={{
-            background: skin.isFullTransformation
-              ? 'radial-gradient(circle at 50% 45%, rgba(8,6,14,0.35) 0%, rgba(8,6,14,0.88) 92%)'
+            background: isChristmas
+              ? preferSkinBackdrop
+                ? 'radial-gradient(circle at 46% 36%, rgba(16, 12, 32, 0.14) 0%, rgba(14, 10, 26, 0.42) 55%, rgba(9, 7, 16, 0.82) 100%)'
+                : 'radial-gradient(circle at 50% 48%, rgba(8, 12, 22, 0.48) 0%, rgba(7, 8, 14, 0.86) 88%)'
+              : skin.isFullTransformation
+              ? 'radial-gradient(circle at 46% 42%, rgba(8,6,14,0.22) 0%, rgba(8,6,14,0.78) 90%)'
               : '#07080d',
-            opacity: Math.min(0.96, Math.max(0.24, dimPct / 100)),
+            opacity: isChristmas && preferSkinBackdrop ? 1 : Math.min(0.96, Math.max(0.24, dimPct / 100)),
           }}
         />
+
+        {/* Christmas Sunset/Moonlit Aurora Warmth Glow on Sky Center */}
+        {isChristmas && bgFxMode !== 'minimal' && (
+          <div
+            className="absolute inset-0"
+            style={{
+              background:
+                'radial-gradient(circle at 56% 24%, rgba(251, 191, 36, 0.16) 0%, rgba(244, 114, 182, 0.10) 24%, rgba(52, 211, 153, 0.08) 46%, transparent 72%)',
+            }}
+          />
+        )}
 
         {/* Dynamic ambiance: classic disco grid OR transformation atmospheric aura */}
         {bgFxMode === 'dynamic' && (

@@ -2,6 +2,7 @@ import React from 'react';
 import { motion } from 'motion/react';
 import { Award, Film, ListMusic, RotateCcw, Sparkles } from 'lucide-react';
 import { computeNextMilestone } from '../engine/beatmap';
+import { XMAS_SPRITES } from '../data/christmasSprites';
 import { getResolvedChassisTheme } from '../store/studioRegistryStore';
 import { RunSummaryData, ThemeId } from '../types/game';
 import { useStudioLayout } from './LiveLayoutWrapper';
@@ -108,7 +109,15 @@ export const RunSummaryModal: React.FC<RunSummaryModalProps> = ({
             </p>
           </div>
 
-          <div className="shrink-0 text-right">
+          <div className="relative shrink-0 text-right">
+            {themeId === 'cozy_christmas_2026' && summary.cleared && (
+              <img
+                aria-hidden="true"
+                src={XMAS_SPRITES.wreath}
+                alt=""
+                className="pointer-events-none absolute -left-14 top-1/2 h-12 w-12 -translate-y-1/2 object-contain drop-shadow-[0_4px_10px_rgba(0,0,0,0.7)]"
+              />
+            )}
             <span className="block text-[11px] font-semibold uppercase tracking-widest text-[#a1abbe]">
               Rank
             </span>
@@ -264,7 +273,7 @@ export const RunSummaryModal: React.FC<RunSummaryModalProps> = ({
           )}
 
           {/* Orbs & Next Rank Forecast */}
-          <div className="flex flex-col gap-2 border border-white/10 bg-[#101420] p-4 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex flex-col gap-2 border skin-blade p-4 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <div className="flex items-center gap-2 text-sm font-bold text-[#fbbf24] tabular-nums">
                 <OrbIcon className="h-4 w-4" />
@@ -292,7 +301,7 @@ export const RunSummaryModal: React.FC<RunSummaryModalProps> = ({
             <button
               type="button"
               onClick={onOpenSongSelect}
-              className="tactile-btn flex items-center gap-2 border border-white/15 bg-[#141928] px-5 py-2.5 text-xs font-bold text-white hover:border-white/35 cursor-pointer whitespace-nowrap"
+              className="tactile-btn flex items-center gap-2 border skin-blade px-5 py-2.5 text-xs font-bold text-white hover:border-white/35 cursor-pointer whitespace-nowrap"
             >
               <ListMusic className="h-4 w-4" />
               <span>Track Select</span>

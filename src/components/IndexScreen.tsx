@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { motion } from 'motion/react';
 import { ArrowLeft, Award, BarChart3, BookOpen, Check, Crown, Lock, Play, Snowflake } from 'lucide-react';
 import { BADGE_CATALOG, WAVE_MODES } from '../data/catalog';
+import { XMAS_SPRITES } from '../data/christmasSprites';
 import { computeMasteryPrestige, TAU } from '../engine/beatmap';
 import { getResolvedSkinPack } from '../store/studioRegistryStore';
 import { PlayerProfile, SongDefinition, WaveModeId, WaveModeInfo } from '../types/game';
@@ -234,6 +235,7 @@ export const IndexScreen: React.FC<IndexScreenProps> = ({
   const prestige = computeMasteryPrestige(profile, songs);
   const { themesMap } = useStudioLayout();
   const skin = getResolvedSkinPack(profile.theme, themesMap);
+  const isCozyXmas = profile.theme === 'cozy_christmas_2026';
 
   return (
     <motion.div
@@ -378,7 +380,8 @@ export const IndexScreen: React.FC<IndexScreenProps> = ({
               <div className="space-y-6">
                 <div className="flex flex-col items-center gap-6 border-b border-white/10 pb-6 sm:flex-row sm:items-start">
                   {/* Live Animated Diagram Canvas */}
-                  <div className="skin-surface-elevated flex flex-col items-center border p-3">
+                  <div className="skin-surface-elevated relative flex flex-col items-center border p-3">
+                    <SkinBladeTrim themeId={profile.theme} featured={isCozyXmas} compact={!isCozyXmas} />
                     <MechanicDemoCanvas mode={selectedMode} />
                     <span className="mt-1 text-[10px] font-bold uppercase tracking-widest text-[#808ba1]">
                       Live Visual Preview
@@ -475,6 +478,14 @@ export const IndexScreen: React.FC<IndexScreenProps> = ({
               style={{ backgroundColor: skin.surfaceBg, borderColor: skin.surfaceBorder }}
             >
               <SkinBladeTrim themeId={profile.theme} featured />
+              {isCozyXmas && (
+                <img
+                  aria-hidden="true"
+                  src={XMAS_SPRITES.bellBow}
+                  alt=""
+                  className="pointer-events-none hidden sm:block absolute -left-3 -bottom-3 h-10 w-10 object-contain drop-shadow"
+                />
+              )}
               <div className="flex flex-wrap items-center justify-between gap-4">
                 <div className="flex items-center gap-3.5 min-w-0">
                   <div

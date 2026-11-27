@@ -14,6 +14,7 @@ import {
   Volume2,
 } from 'lucide-react';
 import { CHASSIS_THEMES } from '../data/catalog';
+import { XMAS_SPRITES } from '../data/christmasSprites';
 import { getResolvedChassisTheme, getResolvedSkinPack } from '../store/studioRegistryStore';
 import { BgFxMode, HitSfxMode, OverdriveVfxMode, PlayerProfile, ThemeId } from '../types/game';
 import { ArcadeSwitch } from './LazerChrome';
@@ -101,6 +102,7 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
 }) => {
   const { themesMap } = useStudioLayout();
   const skin = getResolvedSkinPack(profile.theme, themesMap);
+  const isCozyXmas = profile.theme === 'cozy_christmas_2026';
   const themeIds = (
     Object.keys(themesMap).length > 0 ? Object.keys(themesMap) : Object.keys(CHASSIS_THEMES)
   ) as ThemeId[];
@@ -196,6 +198,14 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
             </span>
           </button>
           <div className="flex items-baseline gap-2.5 whitespace-nowrap">
+            {isCozyXmas && (
+              <img
+                aria-hidden="true"
+                src={XMAS_SPRITES.hollyBells}
+                alt=""
+                className="hidden sm:block h-7 w-7 self-center object-contain drop-shadow"
+              />
+            )}
             <h1 className="font-display text-lg sm:text-2xl font-black tracking-tight text-white">
               Cabinet Settings
             </h1>
@@ -276,12 +286,13 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
 
         {/* Right Workbench */}
         <section
-          className="orbit-scroll flex-1 overflow-y-auto border p-5 sm:p-7 lg:col-span-8"
+          className="orbit-scroll relative flex-1 overflow-y-auto border p-5 sm:p-7 lg:col-span-8"
           style={{
             backgroundColor: skin.surfaceBg,
             borderColor: skin.surfaceBorder,
           }}
         >
+          <SkinBladeTrim themeId={profile.theme} compact />
           {section === 'controls' && (
             <div className="space-y-6">
               <div>

@@ -16,6 +16,7 @@ import {
   DIFFICULTY_ORDER,
   MOD_CATALOG,
 } from '../data/catalog';
+import { XMAS_SPRITES } from '../data/christmasSprites';
 import { getResolvedChassisTheme, getResolvedSkinPack } from '../store/studioRegistryStore';
 import { DifficultyId, ModCode, PlayerProfile, SongDefinition, ThemeId } from '../types/game';
 import { useStudioLayout } from './LiveLayoutWrapper';
@@ -100,6 +101,7 @@ export const OrbShopScreen: React.FC<OrbShopScreenProps> = ({
     );
   }).length;
   const skin = getResolvedSkinPack(profile.theme, themesMap);
+  const isCozyXmas = profile.theme === 'cozy_christmas_2026';
 
   return (
     <motion.div
@@ -207,9 +209,21 @@ export const OrbShopScreen: React.FC<OrbShopScreenProps> = ({
         {tab === 'all' && spotlightSong && (
           <section
             className="relative overflow-hidden rounded-lg border"
-            style={{ backgroundColor: skin.surfaceBg, borderColor: skin.surfaceBorder }}
+            style={{
+              backgroundColor: skin.surfaceBg,
+              borderColor: isCozyXmas ? 'rgba(253, 230, 138, 0.5)' : skin.surfaceBorder,
+              boxShadow: isCozyXmas ? '0 10px 36px rgba(190, 18, 60, 0.25)' : undefined,
+            }}
           >
             <SkinBladeTrim themeId={profile.theme} featured />
+            {isCozyXmas && (
+              <img
+                aria-hidden="true"
+                src={XMAS_SPRITES.wreath}
+                alt=""
+                className="pointer-events-none hidden sm:block absolute bottom-3 right-3 h-14 w-14 object-contain opacity-85 drop-shadow-[0_4px_12px_rgba(0,0,0,0.75)] z-20"
+              />
+            )}
             <div className="grid grid-cols-1 lg:grid-cols-12">
               <div className="relative h-44 lg:col-span-5 lg:h-auto overflow-hidden bg-[#07090f]">
                 <img
@@ -285,7 +299,16 @@ export const OrbShopScreen: React.FC<OrbShopScreenProps> = ({
               <div>
                 <div className="mb-3 flex flex-wrap items-baseline justify-between gap-2">
                   <h2 className="font-display flex items-center gap-2 text-lg font-black text-white">
-                    <Snowflake className="h-4 w-4 text-[#38bdf8]" />
+                    {isCozyXmas ? (
+                      <img
+                        aria-hidden="true"
+                        src={XMAS_SPRITES.giftBox}
+                        alt=""
+                        className="h-5 w-5 object-contain"
+                      />
+                    ) : (
+                      <Snowflake className="h-4 w-4 text-[#38bdf8]" />
+                    )}
                     <span>Christmas Collection</span>
                   </h2>
                   <span className="text-xs text-[#93c5fd]">Winter Solstice &amp; Carol of the Bells</span>

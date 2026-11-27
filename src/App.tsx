@@ -4141,6 +4141,7 @@ export default function App() {
           <TopBar
             activeSong={activeSong}
             activeDifficulty={effectivePlayDifficulty}
+            themeId={profile.theme}
             equippedModsCount={effectivePlayMods.length}
             beatLedIndex={uiBeatLed}
             songTimerText={songTimerText}
@@ -4294,6 +4295,7 @@ export default function App() {
 
       <ModDrawer
         open={modsOpen}
+        themeId={profile.theme}
         equippedMods={profile.equippedMods}
         purchasedMods={profile.purchasedMods}
         totalHits={profile.totalHits}

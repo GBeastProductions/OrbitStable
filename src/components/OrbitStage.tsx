@@ -12,6 +12,7 @@ import {
 } from 'lucide-react';
 import { audioEngine } from '../audio/audioEngine';
 import { CHASSIS_THEMES, NEEDLE_TOLERANCE, WAVE_MODES } from '../data/catalog';
+import { XMAS_SPRITES } from '../data/christmasSprites';
 import { renderCustomOverdriveLayers } from '../data/overdriveAnimations';
 import { getSkinPack } from '../data/skinManifests';
 import { formatTimeSec, signedAngleDiff, TAU } from '../engine/beatmap';
@@ -288,6 +289,20 @@ export const OrbitStage: React.FC<OrbitStageProps> = ({
 
   const activeTheme = getResolvedChassisTheme(themeId, themesMap);
   const skinPack = getResolvedSkinPack(themeId, themesMap) || getSkinPack(themeId);
+  const isCozyXmas = themeId === 'cozy_christmas_2026';
+
+  const xmasImgsRef = useRef<{ bow: HTMLImageElement | null; holly: HTMLImageElement | null }>({
+    bow: null,
+    holly: null,
+  });
+
+  useEffect(() => {
+    const bowImg = new Image();
+    bowImg.src = XMAS_SPRITES.bowCrimson;
+    const hollyImg = new Image();
+    hollyImg.src = XMAS_SPRITES.hollySprig;
+    xmasImgsRef.current = { bow: bowImg, holly: hollyImg };
+  }, []);
 
   useEffect(() => {
     const onDown = (e: KeyboardEvent) => {
@@ -544,24 +559,33 @@ export const OrbitStage: React.FC<OrbitStageProps> = ({
         ctx.save();
         if (isActive || powCharge > 0.28) {
           ctx.globalCompositeOperation = 'lighter';
-          const sparkCount = effVfxMode === 'subtle' ? 8 : isActive ? 22 : Math.round(6 + powCharge * 10);
+          const isFrostDial = skinPack.dialStyle === 'christmas_frost';
+          const sparkCount = effVfxMode === 'subtle' ? 8 : isActive ? 26 : Math.round(7 + powCharge * 11);
           for (let i = 0; i < sparkCount; i++) {
             const cycle = (i / sparkCount + animT * (0.34 + (i % 3) * 0.11)) % 1;
             const orbitAng = (i * TAU) / sparkCount + animT * 0.25 * (i % 2 === 0 ? 1 : -1);
-            const radialDist = bezelOuterR * (1.08 + cycle * 0.65);
+            const radialDist = bezelOuterR * (1.08 + cycle * 0.68);
             const sx = cx + Math.cos(orbitAng) * radialDist;
             const sy = cy + Math.sin(orbitAng) * radialDist;
             if (sx < 24 || sx > width - 24 || sy < 24 || sy > height - 24) continue;
 
             ctx.save();
-            ctx.globalAlpha = Math.sin(cycle * Math.PI) * (isActive ? 0.72 : 0.35 * powCharge) * masterScale;
-            if (i % 4 === 0) {
-              drawFourPointStar(ctx, sx, sy, (isActive ? 7 : 5) * (1 - cycle * 0.35), 1.6, animT + i);
-              ctx.fillStyle = theme.edgeTick;
+            ctx.globalAlpha = Math.sin(cycle * Math.PI) * (isActive ? 0.78 : 0.38 * powCharge) * masterScale;
+            const isStar = isFrostDial ? i % 2 === 0 : i % 4 === 0;
+            if (isStar) {
+              drawFourPointStar(
+                ctx,
+                sx,
+                sy,
+                (isActive ? 8.2 : 5.5) * (1 - cycle * 0.35),
+                1.7,
+                animT + i,
+              );
+              ctx.fillStyle = isFrostDial && i % 4 === 0 ? '#bae6fd' : theme.edgeTick;
               ctx.fill();
             } else {
               ctx.beginPath();
-              ctx.arc(sx, sy, (1 - cycle * 0.45) * (isActive ? 2.4 : 1.7), 0, TAU);
+              ctx.arc(sx, sy, (1 - cycle * 0.42) * (isActive ? 2.5 : 1.7), 0, TAU);
               ctx.fillStyle = i % 2 === 0 ? '#ffffff' : theme.bright;
               ctx.fill();
             }
@@ -645,6 +669,7 @@ export const OrbitStage: React.FC<OrbitStageProps> = ({
       }
 
       // 60 Perimeter Bezel Ticks
+      const isFrostStyle = skinPack.dialStyle === 'christmas_frost';
       for (let i = 0; i < 60; i++) {
         const angle = (i * TAU) / 60;
         const isMajor = i % 5 === 0;
@@ -657,6 +682,12 @@ export const OrbitStage: React.FC<OrbitStageProps> = ({
           ? isMajor
             ? '#ffffff'
             : theme.edgeTick
+          : isFrostStyle && isMajor
+          ? i % 15 === 0
+            ? '#fde68a'
+            : i % 10 === 0
+            ? '#fb7185'
+            : '#34d399'
           : isMajor
           ? streakTier === 3
             ? '#ffffff'
@@ -665,8 +696,10 @@ export const OrbitStage: React.FC<OrbitStageProps> = ({
             : streakTier === 1
             ? theme.bright
             : '#4b5563'
+          : isFrostStyle
+          ? 'rgba(253, 230, 138, 0.25)'
           : '#1f2430';
-        ctx.lineWidth = isMajor ? 1.5 : 1;
+        ctx.lineWidth = isMajor ? 1.6 : 1;
         ctx.stroke();
       }
 
@@ -719,11 +752,55 @@ export const OrbitStage: React.FC<OrbitStageProps> = ({
         ctx.lineWidth = 1;
         ctx.stroke();
       } else if (skinPack.dialStyle === 'christmas_frost') {
+        // Dual frosted sky & warm champagne gold inner ring engraving
         ctx.beginPath();
         ctx.arc(cx, cy, bezelOuterR - 3, 0, TAU);
-        ctx.strokeStyle = 'rgba(224, 242, 254, 0.36)';
-        ctx.lineWidth = 1.4;
+        ctx.strokeStyle = 'rgba(253, 230, 138, 0.56)';
+        ctx.lineWidth = 1.5;
         ctx.stroke();
+
+        ctx.beginPath();
+        ctx.arc(cx, cy, bezelOuterR - 6.5, 0, TAU);
+        ctx.strokeStyle = 'rgba(186, 230, 253, 0.32)';
+        ctx.lineWidth = 1.1;
+        ctx.stroke();
+
+        // Cardinal glowing 4-point brass stars on outer rim (strictly outside hit track)
+        for (let c = 0; c < 4; c++) {
+          const ca = (c * Math.PI) / 2;
+          const sx = cx + Math.cos(ca) * (bezelOuterR + 12);
+          const sy = cy + Math.sin(ca) * (bezelOuterR + 12);
+          drawFourPointStar(ctx, sx, sy, 5.2, 1.5, 0);
+          ctx.fillStyle = st.overdriveActive ? '#ffffff' : '#fde047';
+          ctx.fill();
+        }
+
+        // Painted festive holly & crimson velvet bow tucked onto upper rim outside track
+        const { bow, holly } = xmasImgsRef.current;
+        if (st.dialVisualAlpha > 0.25) {
+          if (holly && holly.complete && holly.naturalWidth > 0) {
+            const hSize = Math.max(28, maxR * 0.2);
+            const hAng = -Math.PI * 0.77;
+            const hx = cx + Math.cos(hAng) * (bezelOuterR + 9);
+            const hy = cy + Math.sin(hAng) * (bezelOuterR + 9);
+            ctx.save();
+            ctx.translate(hx, hy);
+            ctx.rotate(-0.28);
+            ctx.drawImage(holly, -hSize / 2, -hSize / 2, hSize, hSize);
+            ctx.restore();
+          }
+          if (bow && bow.complete && bow.naturalWidth > 0) {
+            const bSize = Math.max(38, maxR * 0.27);
+            const bAng = -Math.PI * 0.22;
+            const bx = cx + Math.cos(bAng) * (bezelOuterR + 10);
+            const by = cy + Math.sin(bAng) * (bezelOuterR + 10);
+            ctx.save();
+            ctx.translate(bx, by);
+            ctx.rotate(0.24);
+            ctx.drawImage(bow, -bSize / 2, -bSize / 2, bSize, bSize);
+            ctx.restore();
+          }
+        }
       } else if (skinPack.dialStyle === 'krampus_forged') {
         for (let r = 0; r < 12; r++) {
           const ra = (r * TAU) / 12;
@@ -1463,7 +1540,14 @@ export const OrbitStage: React.FC<OrbitStageProps> = ({
       <div className="pointer-events-none relative z-20 flex w-full items-start justify-between gap-4">
         {/* Top-Left: Score + HP Integrity Bar + Theme-Colored Overdrive Bar */}
         <StudioSlot widgetId="stage_score_hud" label="Score & Integrity HUD" className="flex flex-col">
-          <span className="tabular-nums text-3xl sm:text-4xl font-black tracking-tight text-white leading-none">
+          <span
+            className="tabular-nums text-3xl sm:text-4xl font-black tracking-tight text-white leading-none"
+            style={
+              isCozyXmas
+                ? { textShadow: '0 2px 14px rgba(251, 191, 36, 0.35)' }
+                : undefined
+            }
+          >
             {score.toLocaleString()}
           </span>
           <div className="mt-1.5 flex items-center gap-2 text-xs text-[#b6bfd1] tabular-nums whitespace-nowrap">
@@ -1478,7 +1562,10 @@ export const OrbitStage: React.FC<OrbitStageProps> = ({
             <div className="mt-2 space-y-1.5">
               {/* Integrity Bar */}
               <div className="flex items-center gap-2">
-                <div className="h-1.5 w-36 sm:w-44 overflow-hidden bg-white/10">
+                <div
+                  className="h-1.5 w-36 sm:w-44 overflow-hidden bg-white/10"
+                  style={isCozyXmas ? { border: '1px solid rgba(253, 230, 138, 0.28)' } : undefined}
+                >
                   <div
                     className="h-full transition-all duration-150"
                     style={{ width: `${hpClamped}%`, backgroundColor: hpColor }}
@@ -1496,7 +1583,10 @@ export const OrbitStage: React.FC<OrbitStageProps> = ({
                   style={{
                     backgroundColor: overdriveActive
                       ? `rgba(${activeTheme.bgAccentRgb}, 0.28)`
+                      : isCozyXmas
+                      ? 'rgba(42, 16, 28, 0.72)'
                       : 'rgba(255,255,255,0.09)',
+                    border: isCozyXmas ? '1px solid rgba(253, 230, 138, 0.36)' : undefined,
                     boxShadow: overdriveActive
                       ? `0 0 14px rgba(${activeTheme.bgAccentRgb}, 0.8), inset 0 0 0 1px ${activeTheme.edgeTick}`
                       : undefined,
@@ -1625,7 +1715,16 @@ export const OrbitStage: React.FC<OrbitStageProps> = ({
 
         {phase === 'IDLE' && !isReplayMode && (
           <div className="pointer-events-none absolute inset-x-0 bottom-4 flex justify-center">
-            <div className="lazer-slant-sm border border-white/15 bg-[#0e111a]/92 px-6 py-2 text-xs font-bold text-white">
+            <div
+              className="lazer-slant-sm relative border px-6 py-2 text-xs font-bold text-white shadow-lg"
+              style={{
+                background: isCozyXmas
+                  ? 'linear-gradient(90deg, rgba(159, 18, 57, 0.92), rgba(40, 12, 24, 0.95))'
+                  : skinPack.bladeBg,
+                borderColor: isCozyXmas ? 'rgba(253, 230, 138, 0.6)' : skinPack.surfaceBorder,
+              }}
+            >
+              <SkinBladeTrim themeId={themeId} compact />
               <span className="lazer-unslant-sm block">{promptHint}</span>
             </div>
           </div>
@@ -1644,8 +1743,10 @@ export const OrbitStage: React.FC<OrbitStageProps> = ({
           className="relative w-full border backdrop-blur-md"
           style={{
             backgroundColor: skinPack.surfaceBg,
-            borderColor: activeTheme.primary,
-            boxShadow: `0 -4px 28px rgba(0, 0, 0, 0.85), 0 0 18px rgba(${activeTheme.bgAccentRgb}, 0.32)`,
+            borderColor: isCozyXmas ? 'rgba(253, 230, 138, 0.55)' : activeTheme.primary,
+            boxShadow: isCozyXmas
+              ? '0 -6px 32px rgba(0, 0, 0, 0.85), 0 0 24px rgba(225, 29, 72, 0.34)'
+              : `0 -4px 28px rgba(0, 0, 0, 0.85), 0 0 18px rgba(${activeTheme.bgAccentRgb}, 0.32)`,
           }}
         >
           <SkinBladeTrim themeId={themeId} compact />
@@ -1654,7 +1755,9 @@ export const OrbitStage: React.FC<OrbitStageProps> = ({
             aria-hidden="true"
             className="pointer-events-none absolute inset-x-0 top-0 h-[2px]"
             style={{
-              background: `linear-gradient(90deg, ${activeTheme.bright}, ${activeTheme.primary}, ${activeTheme.secondary}, ${activeTheme.bright})`,
+              background: isCozyXmas
+                ? 'linear-gradient(90deg, #fde68a, #e11d48, #fbbf24, #fde68a)'
+                : `linear-gradient(90deg, ${activeTheme.bright}, ${activeTheme.primary}, ${activeTheme.secondary}, ${activeTheme.bright})`,
             }}
           />
 
@@ -1663,11 +1766,21 @@ export const OrbitStage: React.FC<OrbitStageProps> = ({
             <div
               className="relative flex min-w-[154px] flex-col justify-center pl-3 pr-6 py-0.5 shrink-0 tabular-nums"
               style={{
-                background: `linear-gradient(125deg, rgba(${activeTheme.bgAccentRgb}, 0.24) 0%, ${skinPack.bladeBg} 86%)`,
+                background: isCozyXmas
+                  ? 'linear-gradient(125deg, rgba(190, 18, 60, 0.42) 0%, rgba(28, 11, 22, 0.96) 86%)'
+                  : `linear-gradient(125deg, rgba(${activeTheme.bgAccentRgb}, 0.24) 0%, ${skinPack.bladeBg} 86%)`,
                 clipPath: 'polygon(0 0, 100% 0, calc(100% - 14px) 100%, 0 100%)',
-                borderRight: `2px solid ${activeTheme.bright}`,
+                borderRight: `2px solid ${isCozyXmas ? '#fde68a' : activeTheme.bright}`,
               }}
             >
+              {isCozyXmas && (
+                <img
+                  aria-hidden="true"
+                  src={XMAS_SPRITES.hollySprig}
+                  alt=""
+                  className="pointer-events-none absolute -left-2 -top-2 h-6 w-6 object-contain drop-shadow"
+                />
+              )}
               <div className="flex items-center gap-1.5 text-[10px] leading-tight text-[#d1d5db] whitespace-nowrap">
                 <span>
                   Combo: {streak} ({streakMult.toFixed(2)}x)
@@ -1694,7 +1807,8 @@ export const OrbitStage: React.FC<OrbitStageProps> = ({
               <button
                 type="button"
                 onClick={isReplayMode ? onToggleReplayPause : onTogglePracticePause}
-                className="tactile-btn flex h-8 items-center gap-1.5 border border-white/25 bg-gradient-to-b from-[#1e2233] to-[#111420] px-3 text-[11px] font-extrabold text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.18)] hover:border-[var(--accent-bright)] cursor-pointer whitespace-nowrap"
+                className="tactile-btn flex h-8 items-center gap-1.5 border border-white/25 px-3 text-[11px] font-extrabold text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.18)] hover:border-[var(--accent-bright)] cursor-pointer whitespace-nowrap"
+                style={{ backgroundColor: skinPack.bladeBg, borderColor: skinPack.surfaceBorder }}
               >
                 {(isReplayMode ? replayPaused : practicePaused) ? (
                   <>
@@ -2018,8 +2132,13 @@ export const OrbitStage: React.FC<OrbitStageProps> = ({
                 className={`tactile-btn border px-2.5 py-1 font-mono text-[11px] font-bold ${
                   pressedKey === 'k1'
                     ? 'border-[var(--accent-bright)] bg-[var(--accent)] text-white'
-                    : 'border-white/15 bg-[#101420]/90 text-[#d1d5db]'
+                    : 'text-[#d1d5db]'
                 }`}
+                style={
+                  pressedKey === 'k1'
+                    ? undefined
+                    : { backgroundColor: skinPack.bladeBg, borderColor: skinPack.surfaceBorder }
+                }
               >
                 {trigger1Label}
               </span>
@@ -2028,8 +2147,13 @@ export const OrbitStage: React.FC<OrbitStageProps> = ({
                 className={`tactile-btn border px-2.5 py-1 font-mono text-[11px] font-bold ${
                   pressedKey === 'k2'
                     ? 'border-[var(--accent-bright)] bg-[var(--accent)] text-white'
-                    : 'border-white/15 bg-[#101420]/90 text-[#d1d5db]'
+                    : 'text-[#d1d5db]'
                 }`}
+                style={
+                  pressedKey === 'k2'
+                    ? undefined
+                    : { backgroundColor: skinPack.bladeBg, borderColor: skinPack.surfaceBorder }
+                }
               >
                 {trigger2Label}
               </span>

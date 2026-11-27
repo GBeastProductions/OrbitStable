@@ -1,5 +1,6 @@
 import React from 'react';
 import { Disc3, Lock } from 'lucide-react';
+import { XMAS_SPRITES } from '../data/christmasSprites';
 import { getResolvedSkinPack } from '../store/studioRegistryStore';
 import { ThemeId } from '../types/game';
 import { useStudioLayout } from './LiveLayoutWrapper';
@@ -69,6 +70,16 @@ export const DiscCartridge: React.FC<DiscCartridgeProps> = ({
           borderColor: skin.isFullTransformation ? skin.surfaceBorder : 'rgba(255,255,255,0.25)',
         }}
       >
+        {/* Painted Golden Holiday Disc Rim overlay for Cozy Christmas */}
+        {themeId === 'cozy_christmas_2026' && (
+          <img
+            src={XMAS_SPRITES.discGold}
+            alt=""
+            aria-hidden="true"
+            className="pointer-events-none absolute inset-0 h-full w-full object-cover opacity-90"
+          />
+        )}
+
         {/* Subtle holographic CD / vinyl groove sheen */}
         <div
           aria-hidden="true"
@@ -78,7 +89,7 @@ export const DiscCartridge: React.FC<DiscCartridgeProps> = ({
               themeId === 'neon_sakura'
                 ? 'conic-gradient(from 35deg, transparent 0deg, rgba(250,204,21,0.34) 30deg, transparent 85deg, rgba(244,63,142,0.34) 170deg, transparent 245deg, rgba(251,207,232,0.28) 310deg, transparent 360deg)'
                 : themeId === 'cozy_christmas_2026'
-                ? 'conic-gradient(from 35deg, transparent 0deg, rgba(253,230,138,0.34) 40deg, transparent 105deg, rgba(52,211,153,0.28) 185deg, transparent 265deg, rgba(225,29,72,0.3) 320deg, transparent 360deg)'
+                ? 'conic-gradient(from 35deg, transparent 0deg, rgba(253,230,138,0.42) 40deg, transparent 105deg, rgba(52,211,153,0.28) 185deg, transparent 265deg, rgba(225,29,72,0.34) 320deg, transparent 360deg)'
                 : themeId === 'krampusnacht_2026'
                 ? 'conic-gradient(from 35deg, transparent 0deg, rgba(220,38,38,0.42) 38deg, transparent 100deg, rgba(245,158,11,0.3) 190deg, transparent 275deg, rgba(254,202,202,0.22) 325deg, transparent 360deg)'
                 : 'conic-gradient(from 35deg, transparent 0deg, rgba(255,255,255,0.24) 30deg, transparent 68deg, rgba(34,211,238,0.22) 140deg, transparent 210deg, rgba(255,59,130,0.24) 280deg, transparent 360deg)',

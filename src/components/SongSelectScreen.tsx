@@ -27,6 +27,7 @@ import {
   DIFFICULTIES,
   DIFFICULTY_ORDER,
 } from '../data/catalog';
+import { XMAS_SPRITES } from '../data/christmasSprites';
 import {
   computeModMultiplier,
   computeNextMilestone,
@@ -247,6 +248,7 @@ export const SongSelectScreen: React.FC<SongSelectScreenProps> = React.memo(
     const modMult = computeModMultiplier(profile.equippedMods);
     const { themesMap } = useStudioLayout();
     const skin = getResolvedSkinPack(profile.theme, themesMap);
+    const isCozyXmas = profile.theme === 'cozy_christmas_2026';
 
     return (
       <motion.div
@@ -290,6 +292,14 @@ export const SongSelectScreen: React.FC<SongSelectScreenProps> = React.memo(
               </span>
             </button>
             <div className="hidden min-[430px]:flex items-baseline gap-2.5 min-w-0 truncate">
+              {isCozyXmas && (
+                <img
+                  aria-hidden="true"
+                  src={XMAS_SPRITES.bellBow}
+                  alt=""
+                  className="hidden sm:block h-7 w-7 self-center object-contain drop-shadow-[0_2px_6px_rgba(251,191,36,0.45)]"
+                />
+              )}
               <h1 className="font-display text-base sm:text-xl font-extrabold tracking-tight text-white whitespace-nowrap">
                 Track Select
               </h1>
@@ -927,6 +937,8 @@ export const SongSelectScreen: React.FC<SongSelectScreenProps> = React.memo(
                         className={`tactile-btn lazer-slant-sm group relative flex w-full items-center justify-between gap-4 overflow-hidden border px-4 py-2.5 text-left cursor-pointer ${
                           isSelected
                             ? 'skin-surface-elevated border-[var(--accent-bright)] shadow-[0_0_24px_rgba(var(--bg-accent-rgb,255,59,130),0.26)] translate-x-1'
+                            : isCozyXmas
+                            ? 'skin-blade border-[#fde68a]/35 hover:border-[#fde68a]/85'
                             : isChristmasTrack
                             ? 'skin-blade border-[#38bdf8]/40 hover:border-[#38bdf8]/80'
                             : song.demonOnly
@@ -1157,6 +1169,15 @@ export const SongSelectScreen: React.FC<SongSelectScreenProps> = React.memo(
             borderColor: skin.surfaceBorder,
           }}
         >
+          <SkinBladeTrim themeId={profile.theme} compact />
+          {isCozyXmas && (
+            <img
+              aria-hidden="true"
+              src={XMAS_SPRITES.giftBox}
+              alt=""
+              className="pointer-events-none hidden lg:block absolute left-1/2 -top-6 h-10 w-10 -translate-x-1/2 object-contain drop-shadow-[0_4px_10px_rgba(0,0,0,0.75)]"
+            />
+          )}
           <div className="flex items-center gap-2 sm:gap-3 shrink-0">
             <button
               type="button"

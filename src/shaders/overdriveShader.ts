@@ -65,8 +65,15 @@ float fbm(vec2 p) {
   return v;
 }
 
+float starSparkle(vec2 p, float r) {
+  float d1 = exp(-abs(p.x) * (16.0 / r)) * exp(-abs(p.y) * (2.6 / r));
+  float d2 = exp(-abs(p.y) * (16.0 / r)) * exp(-abs(p.x) * (2.6 / r));
+  float core = exp(-length(p) * (6.0 / r));
+  return clamp(d1 + d2 + core * 0.85, 0.0, 1.5);
+}
+
 void main() {
-  float intensity = clamp(u_active > 0.5 ? 1.0 : smoothstep(0.18, 1.0, u_charge) * 0.72, 0.0, 1.0);
+  float intensity = clamp(u_active > 0.5 ? 1.0 : smoothstep(0.14, 1.0, u_charge) * 0.78, 0.0, 1.0);
   if (intensity <= 0.005) {
     outColor = vec4(0.0);
     return;
@@ -76,47 +83,62 @@ void main() {
   vec2 aspectDelta = (v_uv - u_center) * (u_res / minDim);
   float dist = length(aspectDelta);
   float ang = atan(aspectDelta.y, aspectDelta.x);
-  float t = u_time * max(0.3, u_speed);
+  float t = u_time * max(0.35, u_speed);
+  float audioBoost = 1.0 + u_bass * 0.85 + u_beatPulse * 0.48;
 
-  // Seamless viewport edge mask (strictly fades to 0 before canvas bounds so no box edge ever shows)
-  float edgeFadeX = smoothstep(0.0, 0.14, v_uv.x) * smoothstep(1.0, 0.86, v_uv.x);
-  float edgeFadeY = smoothstep(0.0, 0.14, v_uv.y) * smoothstep(1.0, 0.86, v_uv.y);
+  // Seamless viewport edge feather (prevents hard edges while keeping screen presence huge)
+  float edgeFadeX = smoothstep(0.0, 0.055, v_uv.x) * smoothstep(1.0, 0.945, v_uv.x);
+  float edgeFadeY = smoothstep(0.0, 0.06, v_uv.y) * smoothstep(1.0, 0.94, v_uv.y);
   float safeMask = edgeFadeX * edgeFadeY;
 
-  // 1. Concentric Dial Ring Aura & Silk Tendrils hugging u_bezelR
-  float ringDist = dist - u_bezelR;
-  float polarWarp = fbm(vec2(cos(ang) * 2.4 + t * 0.45, sin(ang) * 2.4 - t * 0.65)) * 0.075 * u_turbulence;
-  float auraBand = exp(-abs(ringDist - 0.035 - polarWarp) * 18.0) * smoothstep(-0.04, 0.03, ringDist);
-  float outerHalo = exp(-max(0.0, ringDist) * (4.5 - 1.8 * intensity));
-  float audioBoost = 1.0 + u_bass * 0.75 + u_beatPulse * 0.42;
+  // 1. Swirling Polar Flame Ribbons whipping outward around the dial
+  float ringDist = max(0.0, dist - u_bezelR * 0.82);
+  float swirlAng = ang - ringDist * (2.6 * u_turbulence) + t * 0.42;
+  vec2 polarVec = vec2(cos(swirlAng), sin(swirlAng));
+  float n1 = fbm(polarVec * 2.8 + vec2(ringDist * 3.4 - t * 1.45, t * 0.55));
+  float n2 = fbm(polarVec * 5.2 - vec2(ringDist * 5.1 - t * 2.1, n1 * 1.8));
+  float ribbonField = n1 * 0.58 + n2 * 0.55;
 
-  float ringEnergy = (auraBand * 1.15 + outerHalo * 0.45) * max(0.0, u_ringAura) * audioBoost;
+  // Sharpen ribbons into dramatic high-contrast anime energy arcs with dark voids between wisps
+  float radialReach = exp(-ringDist * (1.55 - 0.55 * intensity)) * smoothstep(u_bezelR * 0.72, u_bezelR * 1.06, dist);
+  float sharpRibbon = smoothstep(0.46, 0.78, ribbonField + radialReach * 0.34) * radialReach;
+  float emberCrest = smoothstep(0.68, 0.90, ribbonField + radialReach * 0.25) * radialReach;
 
-  // 2. Smooth Peripheral Volumetric Silk Plumes (bottom corners + side flanks, zero hard borders)
+  // Tight luminous crown hugging bezel
+  float crownBand = exp(-abs(dist - u_bezelR - 0.018 - (n1 - 0.5) * 0.055) * 26.0) * max(0.0, u_ringAura);
+
+  // 2. Corner Volumetric Energy Flanks (expands dramatically at full overdrive)
   vec2 uvMirrored = vec2(abs(v_uv.x - 0.5) * 2.0, v_uv.y);
-  float cornerDist = length(vec2(1.0 - uvMirrored.x, uvMirrored.y * 0.92));
-  float cornerMask = exp(-cornerDist * 2.35) * smoothstep(0.28, 0.95, 1.0 - v_uv.y * 0.55);
-  float bottomMask = pow(clamp(1.0 - v_uv.y * 1.45, 0.0, 1.0), 1.65) * smoothstep(0.0, 0.25, 1.0 - abs(v_uv.x - 0.5) * 1.1);
+  float cornerPull = exp(-length(vec2(1.0 - uvMirrored.x, min(v_uv.y, 1.0 - v_uv.y * 0.65))) * 1.95);
+  float outerWisp = smoothstep(0.48, 0.84, fbm(vec2(aspectDelta.x * 2.2, aspectDelta.y * 2.2 - t * 1.35)) + cornerPull * 0.42) * cornerPull;
 
-  vec2 flowUv = vec2(v_uv.x * 3.8, v_uv.y * 2.6 - t * (1.25 + intensity * 0.9));
-  float wispNoise = fbm(flowUv * max(0.4, u_turbulence));
-  float wispDetail = fbm(flowUv * 2.15 + vec2(wispNoise * 1.4, -t * 0.85));
-  float wisps = smoothstep(0.32, 0.78, wispNoise * 0.65 + wispDetail * 0.55) * (cornerMask * 0.95 + bottomMask * 0.65);
-  wisps *= (0.55 + intensity * 0.75) * audioBoost * safeMask;
+  // 3. Sharp Cardinal Anamorphic Star Beams (Horizontal + Vertical + Diagonal) centered on Dial
+  float hBeam = exp(-abs(aspectDelta.y) * (42.0 - u_beatPulse * 10.0)) * exp(-abs(aspectDelta.x) * 1.05);
+  float vBeam = exp(-abs(aspectDelta.x) * (34.0 - u_beatPulse * 8.0)) * exp(-abs(aspectDelta.y) * 1.25);
+  float dBeam = exp(-abs(aspectDelta.y - aspectDelta.x * 0.35) * 58.0) * exp(-dist * 1.45);
+  float flare = (hBeam * 0.78 + vBeam * 0.58 + dBeam * 0.32) * u_flareStrength * (u_active > 0.5 ? 1.0 : 0.32) * (1.0 + u_mid * 0.6);
 
-  // 3. Clean Anamorphic Core Glint Streaks centered cleanly on Dial
-  float horzBeam = exp(-abs(aspectDelta.y) * (36.0 - u_beatPulse * 8.0)) * exp(-abs(aspectDelta.x) * 1.35);
-  float diagBeam = exp(-abs(aspectDelta.y - aspectDelta.x * 0.28) * 52.0) * exp(-dist * 1.6);
-  float flare = (horzBeam * 0.55 + diagBeam * 0.30) * u_flareStrength * (u_active > 0.5 ? 1.0 : 0.28) * (1.0 + u_mid * 0.55);
+  // 4. Twinkling 4-point Orbital Sparkles around perimeter
+  float sparkles = 0.0;
+  for (int k = 0; k < 5; k++) {
+    float fk = float(k);
+    float sAng = fk * 1.2566 + t * (0.28 + fk * 0.05);
+    float sRad = u_bezelR * (1.28 + 0.38 * sin(t * 1.3 + fk * 2.1));
+    vec2 sPos = vec2(cos(sAng), sin(sAng)) * sRad;
+    float pulse = 0.55 + 0.45 * sin(t * 4.5 + fk * 1.7);
+    sparkles += starSparkle(aspectDelta - sPos, 0.055 * pulse) * pulse;
+  }
 
-  // Palette blending: Deep secondary body -> primary silk -> bright rim -> edgeTick core highlight
-  vec3 col = mix(u_secondary * 0.55, u_primary, smoothstep(0.15, 0.65, wispDetail + auraBand * 0.4));
-  col = mix(col, u_bright, smoothstep(0.55, 0.95, auraBand + wisps * 0.65));
-  col += u_edgeTick * flare * 0.95;
+  // Palette composition: Deep secondary ember -> fiery primary silk -> incandescent bright + white hot core
+  float coreMask = clamp(emberCrest * 1.2 + crownBand * 0.9 + flare * 0.85, 0.0, 1.0);
+  vec3 col = mix(u_secondary * 0.65, u_primary, smoothstep(0.18, 0.62, sharpRibbon + outerWisp * 0.5));
+  col = mix(col, u_bright, smoothstep(0.42, 0.85, emberCrest + crownBand * 0.75 + outerWisp * 0.55));
+  col = mix(col, u_edgeTick * 1.15, smoothstep(0.62, 0.96, coreMask));
+  col += vec3(1.0, 0.97, 0.92) * (sparkles * 0.45 + flare * 0.52);
 
-  float totalAlpha = clamp((ringEnergy * 0.55 + wisps * 0.72 + flare * 0.42) * intensity, 0.0, 0.88);
-  vec3 premul = col * totalAlpha;
-  outColor = vec4(premul, totalAlpha);
+  float rawAlpha = (sharpRibbon * 0.82 + crownBand * 0.75 + outerWisp * 0.52 + flare * 0.62 + sparkles * 0.42) * audioBoost * intensity * safeMask;
+  float totalAlpha = clamp(rawAlpha, 0.0, 0.94);
+  outColor = vec4(col * totalAlpha, totalAlpha);
 }
 `;
 

@@ -2,11 +2,13 @@ import React from 'react';
 import { Lock, ShoppingBag, X } from 'lucide-react';
 import { MOD_CATALOG } from '../data/catalog';
 import { computeTotalMultiplier } from '../engine/beatmap';
-import { DifficultyId, ModCategory, ModCode } from '../types/game';
+import { DifficultyId, ModCategory, ModCode, ThemeId } from '../types/game';
 import { OrbIcon } from './OrbIcon';
+import { SkinBladeTrim } from './SkinAtmosphere';
 
 interface ModDrawerProps {
   open: boolean;
+  themeId?: ThemeId;
   equippedMods: ModCode[];
   purchasedMods: ModCode[];
   totalHits: number;
@@ -27,6 +29,7 @@ const GROUPS: { id: ModCategory; label: string; accent: string }[] = [
 export const ModDrawer: React.FC<ModDrawerProps> = React.memo(
   ({
     open,
+    themeId = 'tokyo_pink',
     equippedMods,
     purchasedMods,
     totalHits,
@@ -55,12 +58,13 @@ export const ModDrawer: React.FC<ModDrawerProps> = React.memo(
         {open && (
           <>
             <div
-              className="flex flex-wrap items-center justify-between gap-3 border-b px-6 py-4"
+              className="relative flex flex-wrap items-center justify-between gap-3 border-b px-6 py-4"
               style={{
                 backgroundColor: 'var(--skin-header, #121624)',
                 borderColor: 'var(--skin-border, rgba(255,255,255,0.12))',
               }}
             >
+              <SkinBladeTrim themeId={themeId} compact />
               <div className="min-w-0">
                 <h3
                   id="modDrawerTitle"
@@ -84,14 +88,14 @@ export const ModDrawer: React.FC<ModDrawerProps> = React.memo(
                 <button
                   type="button"
                   onClick={onClearMods}
-                  className="tactile-btn border border-white/15 bg-[#181e30] px-3.5 py-1.5 text-xs font-semibold text-[#d1d5db] hover:text-white cursor-pointer whitespace-nowrap"
+                  className="tactile-btn border skin-blade px-3.5 py-1.5 text-xs font-semibold text-[#d1d5db] hover:text-white cursor-pointer whitespace-nowrap"
                 >
                   Clear All
                 </button>
                 <button
                   type="button"
                   onClick={onClose}
-                  className="tactile-btn border border-white/15 bg-[#181e30] p-2 text-[#d1d5db] hover:text-white cursor-pointer"
+                  className="tactile-btn border skin-blade p-2 text-[#d1d5db] hover:text-white cursor-pointer"
                   aria-label="Close Mod Setup"
                 >
                   <X className="h-4 w-4" />

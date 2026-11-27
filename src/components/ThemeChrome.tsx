@@ -1,4 +1,5 @@
 import React from 'react';
+import { XMAS_SPRITES } from '../data/christmasSprites';
 import { getResolvedSkinPack } from '../store/studioRegistryStore';
 import { ThemeId } from '../types/game';
 import { useStudioLayout } from './LiveLayoutWrapper';
@@ -13,64 +14,12 @@ export const ThemeTitleLogo: React.FC<{
 }> = ({ themeId, accentColor }) => {
   if (themeId === 'cozy_christmas_2026') {
     return (
-      <div className="relative flex items-center gap-3 select-none">
-        <div className="relative">
-          {/* Santa Hat perched atop the 'O' */}
-          <svg
-            aria-hidden="true"
-            viewBox="0 0 84 62"
-            className="pointer-events-none absolute -left-3 -top-6 h-11 w-14 drop-shadow-[0_4px_10px_rgba(0,0,0,0.65)] z-20"
-          >
-            <path
-              d="M14 42 C18 16, 48 6, 68 18 C58 28, 52 38, 46 44 Z"
-              fill="#dc2626"
-              stroke="#7f1d1d"
-              strokeWidth="1.5"
-            />
-            <path d="M24 22 C36 14, 52 14, 62 20" stroke="#fca5a5" strokeWidth="2.5" fill="none" opacity="0.55" strokeLinecap="round" />
-            <circle cx="69" cy="19" r="7" fill="#fffbeb" stroke="#fde68a" strokeWidth="1.5" />
-            <rect x="9" y="39" width="42" height="11" rx="5.5" transform="rotate(-10 30 44)" fill="#ffffff" stroke="#e2e8f0" strokeWidth="1.5" />
-          </svg>
-          {/* Tilted elliptical orbit halo */}
-          <svg
-            aria-hidden="true"
-            viewBox="0 0 240 84"
-            className="pointer-events-none absolute -inset-x-5 -inset-y-2 h-[calc(100%+16px)] w-[calc(100%+40px)] overflow-visible"
-          >
-            <ellipse
-              cx="120"
-              cy="42"
-              rx="108"
-              ry="28"
-              transform="rotate(-9 120 42)"
-              fill="none"
-              stroke="url(#xmasLogoRing)"
-              strokeWidth="2.8"
-            />
-            {/* Hanging star & 4-point shimmer */}
-            <path d="M206 10 L210 20 L220 24 L210 28 L206 38 L202 28 L192 24 L202 20 Z" fill="#fef08a" />
-            <line x1="18" y1="54" x2="18" y2="74" stroke="#fde68a" strokeWidth="1.4" opacity="0.7" />
-            <path d="M18 71 L21 77 L27 78 L22 82 L23 88 L18 85 L13 88 L14 82 L9 78 L15 77 Z" fill="#fbbf24" />
-            <defs>
-              <linearGradient id="xmasLogoRing" x1="0%" y1="0%" x2="100%" y2="0%">
-                <stop offset="0%" stopColor="#fde68a" stopOpacity="0.95" />
-                <stop offset="55%" stopColor="#ffffff" stopOpacity="0.9" />
-                <stop offset="100%" stopColor="#fbbf24" stopOpacity="0.85" />
-              </linearGradient>
-            </defs>
-          </svg>
-          <span
-            className="font-display relative z-10 inline-block text-4xl sm:text-5xl font-black italic tracking-[0.12em] text-white"
-            style={{
-              textShadow: '0 2px 18px rgba(251,191,36,0.45), 0 4px 12px rgba(0,0,0,0.8)',
-            }}
-          >
-            ORBIT
-          </span>
-          <div className="mt-0.5 text-center text-[11px] font-bold tracking-[0.35em] text-[#fde68a]/85">
-            オービット
-          </div>
-        </div>
+      <div className="relative flex items-center select-none">
+        <img
+          src={XMAS_SPRITES.logoOrnate}
+          alt="ORBIT Cozy Christmas 2026"
+          className="h-14 sm:h-16 w-auto object-contain drop-shadow-[0_4px_18px_rgba(251,191,36,0.45)]"
+        />
       </div>
     );
   }
@@ -229,52 +178,62 @@ export const ThemeBladeAccents: React.FC<{
   if (skin.trimStyle === 'snow_cap') {
     return (
       <>
-        {/* Draped fresh snowdrift along top blade edge */}
+        {/* Sculpted frosted snowdrift blanket along top bezel + warm gold bevel trim */}
         <svg
           aria-hidden="true"
-          viewBox="0 0 400 22"
+          viewBox="0 0 400 28"
           preserveAspectRatio="none"
-          className="pointer-events-none absolute -top-[3px] inset-x-0 h-4 w-full z-20 drop-shadow-[0_3px_4px_rgba(2,132,199,0.28)]"
+          className="pointer-events-none absolute -top-[4px] inset-x-0 h-[18px] w-full z-20 drop-shadow-[0_3px_5px_rgba(14,116,144,0.35)]"
         >
+          <defs>
+            <linearGradient id="xmasSnowBody" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor="#ffffff" />
+              <stop offset="68%" stopColor="#f1f5f9" />
+              <stop offset="100%" stopColor="#bae6fd" />
+            </linearGradient>
+          </defs>
           <path
-            d="M0 0 L400 0 L400 8 C375 15, 355 6, 330 12 C305 18, 280 5, 250 11 C222 17, 195 7, 165 13 C135 19, 108 6, 78 12 C48 18, 22 7, 0 11 Z"
-            fill="#f8fafc"
+            d="M0 0 L400 0 L400 10 C382 19, 362 7, 336 15 C312 22, 286 6, 256 13 C228 21, 198 8, 168 15 C140 23, 112 7, 82 14 C54 22, 26 8, 0 13 Z"
+            fill="url(#xmasSnowBody)"
           />
           <path
-            d="M0 8 C22 5, 48 15, 78 10 C108 5, 135 16, 165 11 C195 5, 222 14, 250 9 C280 4, 305 15, 330 10 C355 5, 375 12, 400 7"
+            d="M0 13 C26 8, 54 22, 82 14 C112 7, 140 23, 168 15 C198 8, 228 21, 256 13 C286 6, 312 22, 336 15 C362 7, 382 19, 400 10"
             fill="none"
-            stroke="#bae6fd"
-            strokeWidth="1.5"
+            stroke="#7dd3fc"
+            strokeWidth="1.2"
             opacity="0.7"
           />
         </svg>
 
-        {/* Holly berries & crisp gold shimmer bevel */}
+        {/* Subtle warm champagne-gold inner border sheen */}
+        <span
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-0 z-10 border border-[#fde68a]/35 shadow-[inset_0_0_14px_rgba(251,191,36,0.12)]"
+        />
+
+        {/* Painted Holly Sprig Corner Cluster */}
         {!compact && (
-          <svg
+          <img
             aria-hidden="true"
-            viewBox="0 0 48 40"
-            className="pointer-events-none absolute -left-2 -top-2.5 h-8 w-10 z-30 drop-shadow-md"
-          >
-            <path d="M16 18 C8 12, 4 6, 14 4 C19 10, 22 13, 22 18 Z" fill="#15803d" stroke="#86efac" strokeWidth="0.8" />
-            <path d="M22 18 C28 11, 36 8, 38 16 C32 20, 26 21, 22 18 Z" fill="#166534" stroke="#86efac" strokeWidth="0.8" />
-            <circle cx="19" cy="18" r="3.4" fill="#ef4444" />
-            <circle cx="25" cy="19" r="3.1" fill="#dc2626" />
-            <circle cx="22" cy="14" r="2.8" fill="#f87171" />
-          </svg>
+            src={XMAS_SPRITES.hollySprig}
+            alt=""
+            className="pointer-events-none absolute -left-3 -top-3.5 h-8 w-8 object-contain z-30 drop-shadow-[0_3px_6px_rgba(0,0,0,0.65)]"
+          />
         )}
 
+        {/* Featured Right-Corner Painted Crimson Velvet Bow + Hanging Gold Star */}
         {featured && (
-          <svg
-            aria-hidden="true"
-            viewBox="0 0 36 36"
-            className="pointer-events-none absolute right-2 -top-3 h-8 w-8 z-30 drop-shadow"
-          >
-            <path d="M18 16 L8 9 L12 20 Z" fill="#dc2626" />
-            <path d="M18 16 L28 9 L24 20 Z" fill="#b91c1c" />
-            <circle cx="18" cy="16" r="3.4" fill="#fef08a" />
-            <path d="M18 22 L20 27 L25 28 L21 31 L22 36 L18 33 L14 36 L15 31 L11 28 L16 27 Z" fill="#fbbf24" />
-          </svg>
+          <div aria-hidden="true" className="pointer-events-none absolute -right-2 -top-3.5 z-30 flex flex-col items-center">
+            <img
+              src={XMAS_SPRITES.bowCrimson}
+              alt=""
+              className="h-9 w-9 object-contain drop-shadow-[0_3px_8px_rgba(225,29,72,0.55)]"
+            />
+            <svg viewBox="0 0 24 28" className="-mt-2 h-6 w-5 overflow-visible drop-shadow-[0_0_8px_rgba(253,224,71,0.95)]">
+              <line x1="12" y1="0" x2="12" y2="10" stroke="#fde68a" strokeWidth="1.5" />
+              <path d="M12 8 L14.5 14 L21 14.8 L16 18.8 L17.4 25 L12 21.8 L6.6 25 L8 18.8 L3 14.8 L9.5 14 Z" fill="#fde047" stroke="#fffbeb" strokeWidth="0.7" />
+            </svg>
+          </div>
         )}
       </>
     );
@@ -357,26 +316,40 @@ export const ThemeDiscBezel: React.FC<{ themeId: ThemeId }> = ({ themeId }) => {
   if (themeId === 'cozy_christmas_2026') {
     return (
       <div aria-hidden="true" className="pointer-events-none absolute -inset-6 z-20">
-        {/* Soft snow drift crown + glowing crimson ribbon bow & hanging gold star */}
+        {/* Soft snow drift crown arcing neatly across top platter */}
         <svg viewBox="0 0 260 260" className="h-full w-full overflow-visible">
-          {/* Upper snow arc */}
+          <defs>
+            <linearGradient id="xmasDiscSnow" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor="#ffffff" />
+              <stop offset="100%" stopColor="#bae6fd" />
+            </linearGradient>
+          </defs>
           <path
-            d="M46 66 C 85 26, 155 24, 206 58 C 186 64, 165 50, 140 56 C 115 62, 92 48, 66 64 Z"
-            fill="#f8fafc"
-            opacity="0.92"
+            d="M44 68 C 82 22, 162 20, 212 60 C 190 66, 168 48, 142 56 C 114 64, 90 46, 62 66 Z"
+            fill="url(#xmasDiscSnow)"
+            opacity="0.96"
           />
-          {/* Crimson velvet ribbon & holly bow top-right */}
-          <g transform="translate(198 54)">
-            <path d="M0 0 C-18 -20, -34 -6, -12 8 Z" fill="#dc2626" stroke="#7f1d1d" strokeWidth="1.2" />
-            <path d="M0 0 C22 -16, 32 4, 8 10 Z" fill="#b91c1c" stroke="#7f1d1d" strokeWidth="1.2" />
-            <path d="M-4 4 L-16 32 L-6 26 Z" fill="#991b1b" />
-            <path d="M4 4 L18 34 L6 27 Z" fill="#dc2626" />
-            <circle cx="0" cy="2" r="5" fill="#ef4444" stroke="#fef08a" strokeWidth="1" />
-            {/* Hanging star below bow */}
-            <line x1="0" y1="8" x2="0" y2="38" stroke="#fde68a" strokeWidth="1.4" />
-            <path d="M0 36 L4 44 L12 45 L6 50 L8 58 L0 54 L-8 58 L-6 50 L-12 45 L-4 44 Z" fill="#fbbf24" />
-          </g>
+          {/* Hanging gold star beneath right ribbon */}
+          <line x1="205" y1="74" x2="205" y2="112" stroke="#fde68a" strokeWidth="1.6" opacity="0.85" />
+          <path
+            d="M205 108 L210 119 L222 121 L213 128 L215 140 L205 134 L195 140 L197 128 L188 121 L200 119 Z"
+            fill="#fde047"
+            stroke="#fffbeb"
+            strokeWidth="1"
+          />
         </svg>
+        {/* Painted Crimson Velvet Ribbon Bow perched on upper-right rim */}
+        <img
+          src={XMAS_SPRITES.bowCrimson}
+          alt=""
+          className="absolute -right-2 top-3 h-20 w-20 sm:h-24 sm:w-24 object-contain rotate-[14deg] drop-shadow-[0_6px_14px_rgba(0,0,0,0.75)]"
+        />
+        {/* Painted Holly Sprig nestled along upper-left rim */}
+        <img
+          src={XMAS_SPRITES.hollySprig}
+          alt=""
+          className="absolute left-1 top-3 h-12 w-12 sm:h-14 sm:w-14 object-contain -rotate-[18deg] drop-shadow-[0_4px_10px_rgba(0,0,0,0.7)]"
+        />
       </div>
     );
   }
@@ -481,21 +454,63 @@ export const ThemeCornerFraming: React.FC<{
 
   if (themeId === 'cozy_christmas_2026') {
     return (
-      <div aria-hidden="true" className="pointer-events-none fixed inset-0 z-[6] overflow-hidden transition-opacity duration-300" style={{ opacity }}>
-        {/* Left & Right Evergreen Pine Boughs with warm fairy stars */}
-        <svg viewBox="0 0 260 220" className="absolute -left-2 -top-2 h-44 w-52 sm:h-56 sm:w-64">
-          <path d="M0 0 L210 0 C160 26, 95 45, 0 140 Z" fill="#064e3b" opacity="0.65" />
-          <path d="M0 0 L150 0 C105 24, 58 40, 0 92 Z" fill="#f8fafc" opacity="0.22" />
-          <line x1="65" y1="18" x2="65" y2="56" stroke="#fde68a" strokeWidth="1.2" opacity="0.7" />
-          <path d="M65 54 L68 62 L76 63 L70 68 L72 76 L65 72 L58 76 L60 68 L54 63 L62 62 Z" fill="#fde047" />
-          <line x1="138" y1="8" x2="138" y2="38" stroke="#fde68a" strokeWidth="1" opacity="0.6" />
-          <circle cx="138" cy="41" r="4" fill="#fbbf24" />
+      <div
+        aria-hidden="true"
+        className="pointer-events-none fixed inset-0 z-[8] overflow-hidden transition-opacity duration-300"
+        style={{ opacity: dimDuringPlay ? 0.55 : 0.96 }}
+      >
+        {/* Top Arch Structural Timber & Hanging Gold Fairy Stars */}
+        <svg viewBox="0 0 1600 180" preserveAspectRatio="none" className="absolute inset-x-0 top-0 h-28 sm:h-36 w-full">
+          <defs>
+            <linearGradient id="xmasArchGold" x1="0" y1="0" x2="1" y2="0">
+              <stop offset="0%" stopColor="#fde68a" stopOpacity="0.55" />
+              <stop offset="50%" stopColor="#fffbeb" stopOpacity="0.7" />
+              <stop offset="100%" stopColor="#fde68a" stopOpacity="0.55" />
+            </linearGradient>
+          </defs>
+          <path
+            d="M0 68 Q 800 -18, 1600 68"
+            fill="none"
+            stroke="url(#xmasArchGold)"
+            strokeWidth="2.2"
+          />
+          {/* Swaying golden star ornaments along the upper arch */}
+          {[
+            { x: 110, len: 54, r: 9 },
+            { x: 245, len: 42, r: 7 },
+            { x: 1365, len: 44, r: 7 },
+            { x: 1495, len: 58, r: 10 },
+          ].map((st, idx) => (
+            <g key={idx}>
+              <line x1={st.x} y1={0} x2={st.x} y2={st.len} stroke="#fde68a" strokeWidth="1.4" opacity="0.75" />
+              <path
+                d={`M${st.x} ${st.len - st.r} L${st.x + st.r * 0.3} ${st.len - st.r * 0.3} L${st.x + st.r} ${st.len} L${st.x + st.r * 0.3} ${st.len + st.r * 0.3} L${st.x} ${st.len + st.r} L${st.x - st.r * 0.3} ${st.len + st.r * 0.3} L${st.x - st.r} ${st.len} L${st.x - st.r * 0.3} ${st.len - st.r * 0.3} Z`}
+                fill="#fffbeb"
+              />
+            </g>
+          ))}
         </svg>
-        <svg viewBox="0 0 260 220" className="absolute -right-2 -top-2 h-44 w-52 sm:h-56 sm:w-64">
-          <path d="M260 0 L50 0 C100 26, 165 45, 260 140 Z" fill="#064e3b" opacity="0.65" />
-          <line x1="188" y1="14" x2="188" y2="48" stroke="#fde68a" strokeWidth="1.2" opacity="0.7" />
-          <path d="M188 46 L191 54 L199 55 L193 60 L195 68 L188 64 L181 68 L183 60 L177 55 L185 54 Z" fill="#fde047" />
-        </svg>
+
+        {/* Left & Right Evergreen Pine-and-Brass-Bell Boughs */}
+        <img
+          src={XMAS_SPRITES.boughBell}
+          alt=""
+          className="absolute -left-6 -top-5 h-32 sm:h-44 w-auto object-contain -rotate-[12deg] drop-shadow-[0_6px_18px_rgba(0,0,0,0.7)]"
+        />
+        <img
+          src={XMAS_SPRITES.boughBell}
+          alt=""
+          className="absolute -right-6 -top-5 h-32 sm:h-44 w-auto object-contain -scale-x-100 rotate-[12deg] drop-shadow-[0_6px_18px_rgba(0,0,0,0.7)]"
+        />
+
+        {/* Lower Corner Wreaths (kept subtle on menus, hidden during play for stage clarity) */}
+        {!dimDuringPlay && (
+          <img
+            src={XMAS_SPRITES.wreath}
+            alt=""
+            className="hidden xl:block absolute -left-6 bottom-12 h-28 w-28 object-contain opacity-85 drop-shadow-[0_6px_16px_rgba(0,0,0,0.75)]"
+          />
+        )}
       </div>
     );
   }

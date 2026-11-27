@@ -2,9 +2,8 @@ import neonSakuraSceneImg from '../assets/images/skin_neon_sakura_scene_17957111
 import cozyChristmasSceneImg from '../assets/images/skin_cozy_christmas_scene_1795711181962.jpg';
 import krampusnachtSceneImg from '../assets/images/skin_krampusnacht_scene_1795711182862.jpg';
 import sakuraBranchImg from '../assets/images/skin_sakura_branch_ornament_1795711183094.jpg';
-import christmasGarlandImg from '../assets/images/skin_christmas_garland_ornament_1795711182717.jpg';
 import krampusIronImg from '../assets/images/skin_krampus_iron_ornament_1795711184104.jpg';
-import animeFlameTextureImg from '../assets/images/fx_anime_flame_plume_1795711184734.jpg';
+import { XMAS_SPRITES } from './christmasSprites';
 import { CHASSIS_THEMES } from './catalog';
 import {
   BuiltInThemeId,
@@ -13,8 +12,6 @@ import {
   ThemeId,
   UIActionId,
 } from '../types/game';
-
-export const ANIME_FLAME_TEXTURE_URL = animeFlameTextureImg;
 
 export const UI_ACTION_REGISTRY: Record<
   UIActionId,
@@ -162,54 +159,53 @@ export const SKIN_PACKS: Record<string, SkinPackManifest> = {
   cozy_christmas_2026: {
     id: 'cozy_christmas_2026',
     name: 'Cozy Christmas 2026',
-    subtitle: '聖夜・オーロラの森',
+    subtitle: 'メリークリスマス 2026 · オービット',
     isFullTransformation: true,
     unlockRuleText: 'Achieve S or SS on both Christmas tracks (any difficulty)',
     displayFont: '"Playfair Display", "Outfit", serif',
     bodyFont: '"Plus Jakarta Sans", system-ui, sans-serif',
     monoFont: '"JetBrains Mono", ui-monospace, monospace',
     backdropImageUrl: cozyChristmasSceneImg,
-    backdropScrimRgba: 'rgba(6, 14, 24, 0.56)',
-    surfaceBg: 'rgba(13, 25, 36, 0.86)',
-    surfaceElevatedBg: 'rgba(20, 38, 52, 0.92)',
-    surfaceBorder: 'rgba(253, 230, 138, 0.38)',
-    headerBg: 'rgba(10, 20, 30, 0.88)',
-    bladeBg: 'rgba(18, 32, 46, 0.88)',
-    bladeHoverBg: 'rgba(34, 52, 70, 0.94)',
+    backdropScrimRgba: 'rgba(14, 8, 18, 0.34)',
+    surfaceBg: 'rgba(26, 12, 22, 0.88)',
+    surfaceElevatedBg: 'rgba(42, 16, 28, 0.94)',
+    surfaceBorder: 'rgba(253, 224, 140, 0.46)',
+    headerBg: 'rgba(20, 10, 18, 0.90)',
+    bladeBg: 'rgba(28, 13, 22, 0.90)',
+    bladeHoverBg: 'rgba(72, 18, 32, 0.95)',
     trimStyle: 'snow_cap',
     particlePreset: 'snow',
     dialStyle: 'christmas_frost',
     turntableGlowCss:
-      '0 0 72px rgba(52, 211, 153, 0.28), 0 0 38px rgba(251, 191, 36, 0.32), inset 0 0 0 2px rgba(254, 243, 199, 0.42)',
-    ornamentImageUrl: christmasGarlandImg,
+      '0 0 76px rgba(251, 191, 36, 0.34), 0 0 42px rgba(225, 29, 72, 0.28), inset 0 0 0 2px rgba(254, 243, 199, 0.5)',
+    ornamentImageUrl: XMAS_SPRITES.boughBell,
     overlays: [
       {
         id: 'xmas_tr',
         slot: 'topRight',
-        imageUrl: christmasGarlandImg,
-        opacity: 0.82,
+        imageUrl: XMAS_SPRITES.boughBell,
+        opacity: 0.95,
         scale: 1,
-        rotateDeg: 8,
-        blendMode: 'screen',
+        rotateDeg: 6,
+        blendMode: 'normal',
       },
       {
         id: 'xmas_bl',
         slot: 'bottomLeft',
-        imageUrl: christmasGarlandImg,
-        opacity: 0.72,
-        scale: 0.92,
-        rotateDeg: -14,
-        flipX: true,
-        blendMode: 'screen',
+        imageUrl: XMAS_SPRITES.wreath,
+        opacity: 0.88,
+        scale: 0.95,
+        rotateDeg: -8,
+        blendMode: 'normal',
       },
       {
         id: 'xmas_turntable',
         slot: 'turntable',
-        imageUrl: christmasGarlandImg,
-        opacity: 0.94,
-        scale: 0.64,
-        rotateDeg: -12,
-        blendMode: 'screen',
+        imageUrl: XMAS_SPRITES.bowCrimson,
+        opacity: 0.98,
+        scale: 0.95,
+        rotateDeg: 10,
+        blendMode: 'normal',
       },
     ],
   },

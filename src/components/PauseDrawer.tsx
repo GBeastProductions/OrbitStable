@@ -166,7 +166,7 @@ export const PauseDrawer: React.FC<PauseDrawerProps> = ({
               <button
                 type="button"
                 onClick={onRetryRound}
-                className="tactile-btn lazer-slant-sm flex w-full items-center justify-between border border-white/15 bg-[#121726] px-5 py-3 text-left text-sm font-bold text-white hover:border-[var(--accent-bright)] cursor-pointer"
+                className="tactile-btn lazer-slant-sm flex w-full items-center justify-between border skin-blade px-5 py-3 text-left text-sm font-bold text-white hover:border-[var(--accent-bright)] cursor-pointer"
               >
                 <span className="lazer-unslant-sm flex w-full items-center justify-between">
                   <span>Restart From Beginning</span>
@@ -190,7 +190,7 @@ export const PauseDrawer: React.FC<PauseDrawerProps> = ({
               <button
                 type="button"
                 onClick={onGoToSongSelect}
-                className="tactile-btn lazer-slant-sm flex w-full items-center justify-between border border-white/15 bg-[#121726] px-5 py-3 text-left text-sm font-bold text-white hover:border-white/35 cursor-pointer"
+                className="tactile-btn lazer-slant-sm flex w-full items-center justify-between border skin-blade px-5 py-3 text-left text-sm font-bold text-white hover:border-white/35 cursor-pointer"
               >
                 <span className="lazer-unslant-sm flex w-full items-center justify-between">
                   <span>Change Track</span>
@@ -212,7 +212,7 @@ export const PauseDrawer: React.FC<PauseDrawerProps> = ({
               <button
                 type="button"
                 onClick={onGoToTitle}
-                className="tactile-btn lazer-slant-sm flex w-full items-center justify-between border border-white/12 bg-[#0f131f] px-5 py-3 text-left text-sm font-bold text-[#d1d5db] hover:text-white cursor-pointer"
+                className="tactile-btn lazer-slant-sm flex w-full items-center justify-between border skin-surface-elevated px-5 py-3 text-left text-sm font-bold text-[#d1d5db] hover:text-white cursor-pointer"
               >
                 <span className="lazer-unslant-sm flex w-full items-center justify-between">
                   <span>Quit to Title</span>
@@ -224,7 +224,7 @@ export const PauseDrawer: React.FC<PauseDrawerProps> = ({
 
           {activeTab === 'audio' && (
             <div className="space-y-4">
-              <div className="flex items-center justify-between border border-white/10 bg-[#101420] p-3.5">
+              <div className="flex items-center justify-between border skin-blade p-3.5">
                 <div className="flex-1 pr-3">
                   <div className="flex items-center justify-between mb-1">
                     <span className="text-xs font-bold text-white">Music</span>
@@ -242,7 +242,7 @@ export const PauseDrawer: React.FC<PauseDrawerProps> = ({
                 <ArcadeSwitch checked={profile.musicEnabled} onToggle={onToggleMusic} />
               </div>
 
-              <div className="flex items-center justify-between border border-white/10 bg-[#101420] p-3.5">
+              <div className="flex items-center justify-between border skin-blade p-3.5">
                 <div className="flex-1 pr-3">
                   <div className="flex items-center justify-between mb-1">
                     <span className="text-xs font-bold text-white">Hitsounds</span>
@@ -260,7 +260,7 @@ export const PauseDrawer: React.FC<PauseDrawerProps> = ({
                 <ArcadeSwitch checked={profile.soundEnabled} onToggle={onToggleSound} />
               </div>
 
-              <div className="border border-white/10 bg-[#101420] p-3.5">
+              <div className="border skin-blade p-3.5">
                 <span className="block text-xs font-bold text-white mb-2">Hit SFX Pack</span>
                 <div className="flex gap-1.5">
                   {(['switch', 'harmonic', 'rimshot'] as HitSfxMode[]).map((m) => (
@@ -271,7 +271,7 @@ export const PauseDrawer: React.FC<PauseDrawerProps> = ({
                       className={`tactile-btn flex-1 border py-1.5 text-xs font-bold capitalize cursor-pointer ${
                         profile.hitSfxMode === m
                           ? 'border-[var(--accent-bright)] bg-[var(--accent)] text-[var(--accent-on)]'
-                          : 'border-white/12 bg-[#161b29] text-[#a1abbe]'
+                          : 'skin-surface-elevated text-[#a1abbe]'
                       }`}
                     >
                       {m}
@@ -280,7 +280,7 @@ export const PauseDrawer: React.FC<PauseDrawerProps> = ({
                 </div>
               </div>
 
-              <div className="border border-white/10 bg-[#101420] p-3.5">
+              <div className="border skin-blade p-3.5">
                 <div className="flex items-center justify-between mb-1.5">
                   <span className="text-xs font-bold text-white">Offset Calibration</span>
                   <span className="tabular-nums text-xs font-bold text-[#22d3ee]">
@@ -302,27 +302,27 @@ export const PauseDrawer: React.FC<PauseDrawerProps> = ({
 
           {activeTab === 'ctrl' && (
             <div className="space-y-3">
-              <div className="flex items-center justify-between border border-white/10 bg-[#101420] p-3.5">
+              <div className="flex items-center justify-between border skin-blade p-3.5">
                 <span className="text-xs font-bold text-white">Trigger Key 1</span>
                 <button
                   type="button"
                   onClick={() => onStartRebind(1)}
-                  className="tactile-btn border border-white/20 bg-[#171d2e] px-3.5 py-1.5 font-mono text-xs font-bold text-white hover:border-[var(--accent-bright)] cursor-pointer"
+                  className="tactile-btn border skin-surface-elevated px-3.5 py-1.5 font-mono text-xs font-bold text-white hover:border-[var(--accent-bright)] cursor-pointer"
                 >
                   {listeningSlot === 1 ? 'Press Key...' : profile.trigger1Label}
                 </button>
               </div>
-              <div className="flex items-center justify-between border border-white/10 bg-[#101420] p-3.5">
+              <div className="flex items-center justify-between border skin-blade p-3.5">
                 <span className="text-xs font-bold text-white">Trigger Key 2</span>
                 <button
                   type="button"
                   onClick={() => onStartRebind(2)}
-                  className="tactile-btn border border-white/20 bg-[#171d2e] px-3.5 py-1.5 font-mono text-xs font-bold text-white hover:border-[var(--accent-bright)] cursor-pointer"
+                  className="tactile-btn border skin-surface-elevated px-3.5 py-1.5 font-mono text-xs font-bold text-white hover:border-[var(--accent-bright)] cursor-pointer"
                 >
                   {listeningSlot === 2 ? 'Press Key...' : profile.trigger2Label}
                 </button>
               </div>
-              <div className="flex items-center justify-between border border-white/10 bg-[#101420] p-3.5">
+              <div className="flex items-center justify-between border skin-blade p-3.5">
                 <div>
                   <span className="block text-xs font-bold text-white">Ring Click / Touch</span>
                   <span className="text-[11px] text-[#a1abbe]">Tap &amp; hold directly on disc</span>
