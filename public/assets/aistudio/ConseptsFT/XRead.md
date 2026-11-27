@@ -1,0 +1,1 @@
+this folder will have all the consepts for the themes do not copy thes 1 for 1 thes are only for ideas and to show how big the themes should be worth getting rn the dark Christmas is s on both Christmas demons and the reg is for s on both of the Christmas ones on any difficulty and the japaneese one if for getting s on a demon 

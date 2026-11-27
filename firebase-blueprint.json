@@ -1,0 +1,472 @@
+{
+  "entities": {
+    "UserProfileDoc": {
+      "title": "UserProfileDoc",
+      "description": "Authenticated ORBIT player profile snapshot scoped strictly to its owner UID.",
+      "type": "object",
+      "properties": {
+        "uid": {
+          "type": "string",
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "displayName": {
+          "type": "string",
+          "maxLength": 80
+        },
+        "email": {
+          "type": "string",
+          "format": "email",
+          "maxLength": 180
+        },
+        "theme": {
+          "type": "string",
+          "maxLength": 48,
+          "pattern": "^[a-z0-9_]+$"
+        },
+        "unlockedThemes": {
+          "type": "array",
+          "description": "Bounded list of unlocked theme identifiers (max 30)."
+        },
+        "bestScore": {
+          "type": "integer"
+        },
+        "bestStreak": {
+          "type": "integer"
+        },
+        "totalOrbsEarned": {
+          "type": "integer"
+        },
+        "tutorialSongCompleted": {
+          "type": "boolean"
+        },
+        "dev": {
+          "type": "boolean",
+          "description": "Console-managed developer flag toggled directly in Firebase Console."
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "uid",
+        "theme",
+        "unlockedThemes",
+        "bestScore",
+        "bestStreak",
+        "totalOrbsEarned",
+        "tutorialSongCompleted",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "DevRoleDoc": {
+      "title": "DevRoleDoc",
+      "description": "Console-only developer/admin role assignment document.",
+      "type": "object",
+      "properties": {
+        "uid": {
+          "type": "string",
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "role": {
+          "type": "string",
+          "enum": ["developer", "admin"],
+          "maxLength": 20
+        },
+        "email": {
+          "type": "string",
+          "format": "email",
+          "maxLength": 180
+        },
+        "grantedAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": ["uid", "role", "grantedAt"]
+    },
+    "PublishedSongDoc": {
+      "title": "PublishedSongDoc",
+      "description": "Developer-created or overridden song definition and custom beatmap chart.",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "maxLength": 64,
+          "pattern": "^[a-z0-9_\\-]+$"
+        },
+        "status": {
+          "type": "string",
+          "enum": ["draft", "published"],
+          "maxLength": 16
+        },
+        "title": {
+          "type": "string",
+          "maxLength": 100
+        },
+        "artist": {
+          "type": "string",
+          "maxLength": 100
+        },
+        "genre": {
+          "type": "string",
+          "maxLength": 64
+        },
+        "category": {
+          "type": "string",
+          "maxLength": 24
+        },
+        "bpm": {
+          "type": "number"
+        },
+        "durationSec": {
+          "type": "number"
+        },
+        "audioUrl": {
+          "type": "string",
+          "maxLength": 400
+        },
+        "bgImageUrl": {
+          "type": "string",
+          "maxLength": 180000
+        },
+        "desc": {
+          "type": "string",
+          "maxLength": 320
+        },
+        "scaleNotes": {
+          "type": "array",
+          "description": "Musical scale MIDI notes (max 16)."
+        },
+        "stars": {
+          "type": "object"
+        },
+        "sections": {
+          "type": "array",
+          "description": "Section timing cues (max 16)."
+        },
+        "customBeatmap": {
+          "type": "array",
+          "description": "Hand-crafted or forged beatmap notes (max 900)."
+        },
+        "chillOnly": {
+          "type": "boolean"
+        },
+        "demonOnly": {
+          "type": "boolean"
+        },
+        "orbCost": {
+          "type": "integer"
+        },
+        "createdByUid": {
+          "type": "string",
+          "maxLength": 128
+        },
+        "updatedByUid": {
+          "type": "string",
+          "maxLength": 128
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "status",
+        "title",
+        "artist",
+        "bpm",
+        "durationSec",
+        "createdByUid",
+        "updatedByUid",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "PublishedThemeDoc": {
+      "title": "PublishedThemeDoc",
+      "description": "Developer-created or customized cabinet/transformation theme including Overdrive layers.",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "maxLength": 48,
+          "pattern": "^[a-z0-9_]+$"
+        },
+        "status": {
+          "type": "string",
+          "enum": ["draft", "published"],
+          "maxLength": 16
+        },
+        "label": {
+          "type": "string",
+          "maxLength": 64
+        },
+        "jpLabel": {
+          "type": "string",
+          "maxLength": 64
+        },
+        "orbCost": {
+          "type": "integer"
+        },
+        "isTransformationSkin": {
+          "type": "boolean"
+        },
+        "unlockRequirement": {
+          "type": "string",
+          "maxLength": 140
+        },
+        "primary": {
+          "type": "string",
+          "maxLength": 24
+        },
+        "bright": {
+          "type": "string",
+          "maxLength": 24
+        },
+        "secondary": {
+          "type": "string",
+          "maxLength": 24
+        },
+        "dim": {
+          "type": "string",
+          "maxLength": 24
+        },
+        "onPrimary": {
+          "type": "string",
+          "maxLength": 24
+        },
+        "bgAccentRgb": {
+          "type": "string",
+          "maxLength": 24
+        },
+        "manifest": {
+          "type": "object"
+        },
+        "overdriveLayers": {
+          "type": "array",
+          "description": "Custom layered image/animation Overdrive overlays (max 12)."
+        },
+        "hideBuiltInFlames": {
+          "type": "boolean"
+        },
+        "shaderConfig": {
+          "type": "object",
+          "description": "Live WebGL2 GLSL shader uniform configuration."
+        },
+        "createdByUid": {
+          "type": "string",
+          "maxLength": 128
+        },
+        "updatedByUid": {
+          "type": "string",
+          "maxLength": 128
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "status",
+        "label",
+        "primary",
+        "bright",
+        "secondary",
+        "createdByUid",
+        "updatedByUid",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "PublishedHudLayoutDoc": {
+      "title": "PublishedHudLayoutDoc",
+      "description": "Developer-edited live HUD widget positions, custom decor overlays, and Dev Menu Dock styling.",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "maxLength": 48,
+          "pattern": "^[a-z0-9_\\-]+$"
+        },
+        "status": {
+          "type": "string",
+          "enum": ["draft", "published"],
+          "maxLength": 16
+        },
+        "name": {
+          "type": "string",
+          "maxLength": 80
+        },
+        "widgets": {
+          "type": "object"
+        },
+        "devDockStyle": {
+          "type": "object"
+        },
+        "customDecorWidgets": {
+          "type": "array",
+          "description": "Custom placed decor/image widgets on HUD screens (max 24)."
+        },
+        "createdByUid": {
+          "type": "string",
+          "maxLength": 128
+        },
+        "updatedByUid": {
+          "type": "string",
+          "maxLength": 128
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "status",
+        "name",
+        "widgets",
+        "devDockStyle",
+        "createdByUid",
+        "updatedByUid",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "DevAssetDoc": {
+      "title": "DevAssetDoc",
+      "description": "Developer virtual folder asset entry for Overdrive sprites, theme ornaments, and backgrounds.",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "maxLength": 64,
+          "pattern": "^[a-z0-9_\\-]+$"
+        },
+        "status": {
+          "type": "string",
+          "enum": ["draft", "published"],
+          "maxLength": 16
+        },
+        "name": {
+          "type": "string",
+          "maxLength": 96
+        },
+        "folder": {
+          "type": "string",
+          "maxLength": 64
+        },
+        "kind": {
+          "type": "string",
+          "enum": ["image", "audio"],
+          "maxLength": 16
+        },
+        "dataUrlOrPath": {
+          "type": "string",
+          "maxLength": 280000
+        },
+        "mimeType": {
+          "type": "string",
+          "maxLength": 64
+        },
+        "sizeBytes": {
+          "type": "integer"
+        },
+        "tags": {
+          "type": "array",
+          "description": "Asset animation/category tags (max 10)."
+        },
+        "createdByUid": {
+          "type": "string",
+          "maxLength": 128
+        },
+        "updatedByUid": {
+          "type": "string",
+          "maxLength": 128
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "status",
+        "name",
+        "folder",
+        "kind",
+        "dataUrlOrPath",
+        "createdByUid",
+        "updatedByUid",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "ConnectionDoc": {
+      "title": "ConnectionDoc",
+      "description": "Public read-only health check document for startup Firestore offline diagnostics.",
+      "type": "object",
+      "properties": {
+        "ok": {
+          "type": "boolean"
+        }
+      },
+      "required": ["ok"]
+    }
+  },
+  "firestore": {
+    "/user_profiles/{userId}": {
+      "schema": { "$ref": "#/entities/UserProfileDoc" },
+      "description": "Owner-isolated player progression and unlocked skin snapshot."
+    },
+    "/dev_roles/{userId}": {
+      "schema": { "$ref": "#/entities/DevRoleDoc" },
+      "description": "Console-managed developer/admin role verification documents."
+    },
+    "/published_songs/{songId}": {
+      "schema": { "$ref": "#/entities/PublishedSongDoc" },
+      "description": "Published custom songs and catalog overrides authored by verified developers."
+    },
+    "/published_themes/{themeId}": {
+      "schema": { "$ref": "#/entities/PublishedThemeDoc" },
+      "description": "Published custom themes, skin manifests, and Overdrive layer compositions."
+    },
+    "/published_hud_layouts/{layoutId}": {
+      "schema": { "$ref": "#/entities/PublishedHudLayoutDoc" },
+      "description": "Published UI widget layout overrides and Dev Menu style presets."
+    },
+    "/dev_asset_library/{assetId}": {
+      "schema": { "$ref": "#/entities/DevAssetDoc" },
+      "description": "Organized developer image/audio assets shared across themes, songs, and Overdrive FX."
+    },
+    "/test/connection": {
+      "schema": { "$ref": "#/entities/ConnectionDoc" },
+      "description": "Startup Firestore server connectivity verification ping."
+    }
+  }
+}

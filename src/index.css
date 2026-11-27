@@ -1,0 +1,196 @@
+@import "tailwindcss";
+
+:root {
+  --bg-canvas: #07080d;
+  --bg-surface: #0e111a;
+  --bg-elevated: #151a28;
+  --border-subtle: rgba(255, 255, 255, 0.09);
+  --border-strong: rgba(255, 255, 255, 0.18);
+  --text-primary: #f5f7fa;
+  --text-secondary: #a1abbe;
+  --text-muted: #68738a;
+
+  /* 90s Tokyo Disco × osu!lazer Dynamic Theme Tokens */
+  --theme-primary: #ff3b82;
+  --theme-bright: #ff6ea3;
+  --theme-dim: #380c20;
+  --theme-on-primary: #ffffff;
+  --theme-secondary: #22d3ee;
+
+  --skin-surface: rgba(13, 17, 27, 0.92);
+  --skin-surface-elevated: rgba(20, 26, 40, 0.95);
+  --skin-border: rgba(255, 255, 255, 0.14);
+  --skin-header: rgba(8, 10, 17, 0.92);
+  --skin-blade: rgba(16, 20, 32, 0.92);
+  --skin-blade-hover: rgba(23, 29, 46, 0.96);
+
+  --accent: var(--theme-primary);
+  --accent-bright: var(--theme-bright);
+  --accent-dim: var(--theme-dim);
+  --accent-on: var(--theme-on-primary);
+
+  --font-display: "Outfit", system-ui, -apple-system, sans-serif;
+  --font-sans: "Plus Jakarta Sans", system-ui, -apple-system, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  width: 100%;
+  height: 100dvh;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  background-color: var(--bg-canvas);
+  color: var(--text-primary);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.font-display {
+  font-family: var(--font-display);
+}
+
+.tabular-nums {
+  font-variant-numeric: tabular-nums;
+  font-family: var(--font-mono);
+}
+
+/* osu!lazer Slanted Parallelogram Geometry */
+.lazer-slant {
+  transform: skewX(-12deg);
+}
+
+.lazer-unslant {
+  transform: skewX(12deg);
+}
+
+.lazer-slant-sm {
+  transform: skewX(-8deg);
+}
+
+.lazer-unslant-sm {
+  transform: skewX(8deg);
+}
+
+/* Tactile Arcade Key & Button Motion (<= 160ms compositor-only) */
+.tactile-btn {
+  transition: transform 140ms cubic-bezier(0.16, 1, 0.3, 1),
+    background-color 140ms ease,
+    border-color 140ms ease,
+    opacity 140ms ease;
+}
+
+.tactile-btn:active:not(:disabled),
+.tactile-btn[data-pressed="true"] {
+  transform: scale(0.97) translateY(1px);
+}
+
+/* Subtle 90s CRT Scanline & Disco Sheen Overlays */
+.tokyo-scanlines {
+  background-image: repeating-linear-gradient(
+    to bottom,
+    rgba(255, 255, 255, 0.022) 0px,
+    rgba(255, 255, 255, 0.022) 1px,
+    transparent 1px,
+    transparent 4px
+  );
+}
+
+.disco-grid {
+  background-image:
+    linear-gradient(to right, rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+  background-size: 48px 48px;
+}
+
+/* Clean Scrollbar for Song Carousel & Settings */
+.orbit-scroll::-webkit-scrollbar {
+  width: 5px;
+}
+
+.orbit-scroll::-webkit-scrollbar-track {
+  background: rgba(7, 8, 13, 0.6);
+}
+
+.orbit-scroll::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.18);
+  border-radius: 999px;
+}
+
+.orbit-scroll::-webkit-scrollbar-thumb:hover {
+  background: var(--accent);
+}
+
+.skin-surface {
+  background: var(--skin-surface);
+  border-color: var(--skin-border);
+}
+
+.skin-surface-elevated {
+  background: var(--skin-surface-elevated);
+  border-color: var(--skin-border);
+}
+
+.skin-blade {
+  background: var(--skin-blade);
+  border-color: var(--skin-border);
+}
+
+.skin-blade:hover {
+  background: var(--skin-blade-hover);
+}
+
+.skin-header {
+  background: var(--skin-header);
+  border-color: var(--skin-border);
+}
+
+button:focus-visible,
+input:focus-visible,
+select:focus-visible {
+  outline: 2px solid var(--accent-bright);
+  outline-offset: 2px;
+}
+
+@keyframes vinylSpin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes vinylSpinReverse {
+  from {
+    transform: rotate(360deg);
+  }
+  to {
+    transform: rotate(0deg);
+  }
+}
+
+.animate-vinyl-cw {
+  animation: vinylSpin 22s linear infinite;
+}
+
+.animate-vinyl-ccw {
+  animation: vinylSpinReverse 32s linear infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+  }
+}

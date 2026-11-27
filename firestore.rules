@@ -1,0 +1,521 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Global default-deny safety net
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() >= 1 && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function isValidSlugId(id, maxLen) {
+      return id is string && id.size() >= 1 && id.size() <= maxLen && id.matches('^[a-z0-9_\\-]+$');
+    }
+
+    function isValidThemeSlug(id) {
+      return id is string && id.size() >= 1 && id.size() <= 48 && id.matches('^[a-z0-9_]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isVerifiedUser() {
+      return isSignedIn() && request.auth.token.email_verified == true;
+    }
+
+    function isOwner(userId) {
+      return isVerifiedUser() && request.auth.uid == userId;
+    }
+
+    function isAdmin() {
+      return isVerifiedUser() && (
+        request.auth.token.email == 'studiosmobile092@gmail.com' ||
+        request.auth.token.email == 'mobilelabscreator@gmail.com' ||
+        exists(/databases/$(database)/documents/dev_roles/$(request.auth.uid))
+      );
+    }
+
+    function isDev() {
+      return isVerifiedUser() && (
+        request.auth.token.email == 'studiosmobile092@gmail.com' ||
+        request.auth.token.email == 'mobilelabscreator@gmail.com' ||
+        (
+          exists(/databases/$(database)/documents/user_profiles/$(request.auth.uid)) &&
+          get(/databases/$(database)/documents/user_profiles/$(request.auth.uid)).data.dev == true
+        ) ||
+        (
+          exists(/databases/$(database)/documents/dev_roles/$(request.auth.uid)) &&
+          (
+            get(/databases/$(database)/documents/dev_roles/$(request.auth.uid)).data.role == 'developer' ||
+            get(/databases/$(database)/documents/dev_roles/$(request.auth.uid)).data.role == 'admin'
+          )
+        )
+      );
+    }
+
+    function isValidUserProfile(data, userId) {
+      return data.keys().hasAll([
+          'uid',
+          'theme',
+          'unlockedThemes',
+          'bestScore',
+          'bestStreak',
+          'totalOrbsEarned',
+          'tutorialSongCompleted',
+          'createdAt',
+          'updatedAt'
+        ])
+        && data.keys().hasOnly([
+          'uid',
+          'displayName',
+          'email',
+          'theme',
+          'unlockedThemes',
+          'bestScore',
+          'bestStreak',
+          'totalOrbsEarned',
+          'tutorialSongCompleted',
+          'dev',
+          'createdAt',
+          'updatedAt'
+        ])
+        && data.uid is string
+        && data.uid.size() >= 1
+        && data.uid.size() <= 128
+        && data.uid == userId
+        && (!('displayName' in data) || (data.displayName is string && data.displayName.size() <= 80))
+        && (!('email' in data) || (data.email is string && data.email.size() <= 180))
+        && isValidThemeSlug(data.theme)
+        && data.unlockedThemes is list
+        && data.unlockedThemes.size() >= 1
+        && data.unlockedThemes.size() <= 30
+        && data.unlockedThemes[0] is string
+        && data.bestScore is int
+        && data.bestScore >= 0
+        && data.bestStreak is int
+        && data.bestStreak >= 0
+        && data.totalOrbsEarned is int
+        && data.totalOrbsEarned >= 0
+        && data.tutorialSongCompleted is bool
+        && (!('dev' in data) || data.dev is bool)
+        && data.createdAt is timestamp
+        && data.updatedAt is timestamp;
+    }
+
+    function isValidPublishedSong(data, songId) {
+      return data.keys().hasAll([
+          'id',
+          'status',
+          'title',
+          'artist',
+          'bpm',
+          'durationSec',
+          'createdByUid',
+          'updatedByUid',
+          'createdAt',
+          'updatedAt'
+        ])
+        && data.keys().hasOnly([
+          'id',
+          'status',
+          'title',
+          'artist',
+          'genre',
+          'category',
+          'bpm',
+          'durationSec',
+          'audioUrl',
+          'bgImageUrl',
+          'desc',
+          'scaleNotes',
+          'stars',
+          'sections',
+          'customBeatmap',
+          'chillOnly',
+          'demonOnly',
+          'orbCost',
+          'createdByUid',
+          'updatedByUid',
+          'createdAt',
+          'updatedAt'
+        ])
+        && isValidSlugId(data.id, 64)
+        && data.id == songId
+        && (data.status == 'draft' || data.status == 'published')
+        && data.title is string && data.title.size() >= 1 && data.title.size() <= 100
+        && data.artist is string && data.artist.size() >= 1 && data.artist.size() <= 100
+        && (!('genre' in data) || (data.genre is string && data.genre.size() <= 64))
+        && (!('category' in data) || (data.category is string && data.category.size() <= 24))
+        && (data.bpm is int || data.bpm is float) && data.bpm >= 40 && data.bpm <= 360
+        && (data.durationSec is int || data.durationSec is float) && data.durationSec >= 5 && data.durationSec <= 1200
+        && (!('audioUrl' in data) || (data.audioUrl is string && data.audioUrl.size() <= 400))
+        && (!('bgImageUrl' in data) || (data.bgImageUrl is string && data.bgImageUrl.size() <= 180000))
+        && (!('desc' in data) || (data.desc is string && data.desc.size() <= 320))
+        && (!('scaleNotes' in data) || (data.scaleNotes is list && data.scaleNotes.size() <= 16))
+        && (!('stars' in data) || data.stars is map)
+        && (!('sections' in data) || (data.sections is list && data.sections.size() <= 16))
+        && (!('customBeatmap' in data) || (data.customBeatmap is list && data.customBeatmap.size() <= 900))
+        && (!('chillOnly' in data) || data.chillOnly is bool)
+        && (!('demonOnly' in data) || data.demonOnly is bool)
+        && (!('orbCost' in data) || (data.orbCost is int && data.orbCost >= 0 && data.orbCost <= 10000))
+        && data.createdByUid is string && data.createdByUid.size() >= 1 && data.createdByUid.size() <= 128
+        && data.updatedByUid is string && data.updatedByUid.size() >= 1 && data.updatedByUid.size() <= 128
+        && data.updatedByUid == request.auth.uid
+        && data.createdAt is timestamp
+        && data.updatedAt is timestamp;
+    }
+
+    function isValidPublishedTheme(data, themeId) {
+      return data.keys().hasAll([
+          'id',
+          'status',
+          'label',
+          'primary',
+          'bright',
+          'secondary',
+          'createdByUid',
+          'updatedByUid',
+          'createdAt',
+          'updatedAt'
+        ])
+        && data.keys().hasOnly([
+          'id',
+          'status',
+          'label',
+          'jpLabel',
+          'orbCost',
+          'isTransformationSkin',
+          'unlockRequirement',
+          'primary',
+          'bright',
+          'secondary',
+          'dim',
+          'onPrimary',
+          'bgAccentRgb',
+          'manifest',
+          'overdriveLayers',
+          'hideBuiltInFlames',
+          'shaderConfig',
+          'createdByUid',
+          'updatedByUid',
+          'createdAt',
+          'updatedAt'
+        ])
+        && isValidThemeSlug(data.id)
+        && data.id == themeId
+        && (data.status == 'draft' || data.status == 'published')
+        && data.label is string && data.label.size() >= 1 && data.label.size() <= 64
+        && (!('jpLabel' in data) || (data.jpLabel is string && data.jpLabel.size() <= 64))
+        && (!('orbCost' in data) || (data.orbCost is int && data.orbCost >= 0 && data.orbCost <= 10000))
+        && (!('isTransformationSkin' in data) || data.isTransformationSkin is bool)
+        && (!('unlockRequirement' in data) || (data.unlockRequirement is string && data.unlockRequirement.size() <= 140))
+        && data.primary is string && data.primary.size() >= 4 && data.primary.size() <= 24
+        && data.bright is string && data.bright.size() >= 4 && data.bright.size() <= 24
+        && data.secondary is string && data.secondary.size() >= 4 && data.secondary.size() <= 24
+        && (!('dim' in data) || (data.dim is string && data.dim.size() <= 24))
+        && (!('onPrimary' in data) || (data.onPrimary is string && data.onPrimary.size() <= 24))
+        && (!('bgAccentRgb' in data) || (data.bgAccentRgb is string && data.bgAccentRgb.size() <= 24))
+        && (!('manifest' in data) || data.manifest is map)
+        && (!('overdriveLayers' in data) || (data.overdriveLayers is list && data.overdriveLayers.size() <= 12))
+        && (!('hideBuiltInFlames' in data) || data.hideBuiltInFlames is bool)
+        && (!('shaderConfig' in data) || data.shaderConfig is map)
+        && data.createdByUid is string && data.createdByUid.size() >= 1 && data.createdByUid.size() <= 128
+        && data.updatedByUid is string && data.updatedByUid.size() >= 1 && data.updatedByUid.size() <= 128
+        && data.updatedByUid == request.auth.uid
+        && data.createdAt is timestamp
+        && data.updatedAt is timestamp;
+    }
+
+    function isValidHudLayout(data, layoutId) {
+      return data.keys().hasAll([
+          'id',
+          'status',
+          'name',
+          'widgets',
+          'devDockStyle',
+          'createdByUid',
+          'updatedByUid',
+          'createdAt',
+          'updatedAt'
+        ])
+        && data.keys().hasOnly([
+          'id',
+          'status',
+          'name',
+          'widgets',
+          'devDockStyle',
+          'customDecorWidgets',
+          'createdByUid',
+          'updatedByUid',
+          'createdAt',
+          'updatedAt'
+        ])
+        && isValidSlugId(data.id, 48)
+        && data.id == layoutId
+        && (data.status == 'draft' || data.status == 'published')
+        && data.name is string && data.name.size() >= 1 && data.name.size() <= 80
+        && data.widgets is map
+        && data.devDockStyle is map
+        && (!('customDecorWidgets' in data) || (data.customDecorWidgets is list && data.customDecorWidgets.size() <= 24))
+        && data.createdByUid is string && data.createdByUid.size() >= 1 && data.createdByUid.size() <= 128
+        && data.updatedByUid is string && data.updatedByUid.size() >= 1 && data.updatedByUid.size() <= 128
+        && data.updatedByUid == request.auth.uid
+        && data.createdAt is timestamp
+        && data.updatedAt is timestamp;
+    }
+
+    function isValidDevAsset(data, assetId) {
+      return data.keys().hasAll([
+          'id',
+          'status',
+          'name',
+          'folder',
+          'kind',
+          'dataUrlOrPath',
+          'createdByUid',
+          'updatedByUid',
+          'createdAt',
+          'updatedAt'
+        ])
+        && data.keys().hasOnly([
+          'id',
+          'status',
+          'name',
+          'folder',
+          'kind',
+          'dataUrlOrPath',
+          'mimeType',
+          'sizeBytes',
+          'tags',
+          'createdByUid',
+          'updatedByUid',
+          'createdAt',
+          'updatedAt'
+        ])
+        && isValidSlugId(data.id, 64)
+        && data.id == assetId
+        && (data.status == 'draft' || data.status == 'published')
+        && data.name is string && data.name.size() >= 1 && data.name.size() <= 96
+        && data.folder is string && data.folder.size() >= 1 && data.folder.size() <= 64
+        && (data.kind == 'image' || data.kind == 'audio')
+        && data.dataUrlOrPath is string && data.dataUrlOrPath.size() >= 1 && data.dataUrlOrPath.size() <= 280000
+        && (!('mimeType' in data) || (data.mimeType is string && data.mimeType.size() <= 64))
+        && (!('sizeBytes' in data) || (data.sizeBytes is int && data.sizeBytes >= 0 && data.sizeBytes <= 50000000))
+        && (!('tags' in data) || (data.tags is list && data.tags.size() <= 10))
+        && data.createdByUid is string && data.createdByUid.size() >= 1 && data.createdByUid.size() <= 128
+        && data.updatedByUid is string && data.updatedByUid.size() >= 1 && data.updatedByUid.size() <= 128
+        && data.updatedByUid == request.auth.uid
+        && data.createdAt is timestamp
+        && data.updatedAt is timestamp;
+    }
+
+    match /user_profiles/{userId} {
+      allow get: if isValidId(userId) && (isOwner(userId) || isAdmin());
+      allow list: if false;
+
+      allow create: if isValidId(userId)
+        && isOwner(userId)
+        && isValidUserProfile(incoming(), userId)
+        && (!('dev' in incoming()) || incoming().dev == false || isAdmin())
+        && incoming().createdAt == request.time
+        && incoming().updatedAt == request.time;
+
+      allow update: if isValidId(userId)
+        && (isOwner(userId) || isAdmin())
+        && isValidUserProfile(incoming(), userId)
+        && incoming().uid == existing().uid
+        && incoming().createdAt == existing().createdAt
+        && incoming().updatedAt == request.time
+        && incoming().diff(existing()).affectedKeys().hasOnly([
+          'displayName',
+          'email',
+          'theme',
+          'unlockedThemes',
+          'bestScore',
+          'bestStreak',
+          'totalOrbsEarned',
+          'tutorialSongCompleted',
+          'updatedAt'
+        ]);
+
+      allow delete: if isValidId(userId) && isAdmin();
+    }
+
+    match /dev_roles/{userId} {
+      allow get: if isValidId(userId) && (isOwner(userId) || isAdmin());
+      allow list: if false;
+      allow create, update, delete: if false;
+    }
+
+    match /published_songs/{songId} {
+      allow get: if isValidId(songId) && (existing().status == 'published' || isDev());
+      allow list: if existing().status == 'published'
+        || (isVerifiedUser() && (existing().updatedByUid == request.auth.uid || request.auth.token.email == 'studiosmobile092@gmail.com' || request.auth.token.email == 'mobilelabscreator@gmail.com'));
+
+      allow create: if isValidId(songId)
+        && isDev()
+        && isValidPublishedSong(incoming(), songId)
+        && incoming().createdByUid == request.auth.uid
+        && incoming().createdAt == request.time
+        && incoming().updatedAt == request.time;
+
+      allow update: if isValidId(songId)
+        && isDev()
+        && isValidPublishedSong(incoming(), songId)
+        && incoming().id == existing().id
+        && incoming().createdByUid == existing().createdByUid
+        && incoming().createdAt == existing().createdAt
+        && incoming().updatedAt == request.time
+        && incoming().diff(existing()).affectedKeys().hasOnly([
+          'status',
+          'title',
+          'artist',
+          'genre',
+          'category',
+          'bpm',
+          'durationSec',
+          'audioUrl',
+          'bgImageUrl',
+          'desc',
+          'scaleNotes',
+          'stars',
+          'sections',
+          'customBeatmap',
+          'chillOnly',
+          'demonOnly',
+          'orbCost',
+          'updatedByUid',
+          'updatedAt'
+        ]);
+
+      allow delete: if isValidId(songId) && isDev();
+    }
+
+    match /published_themes/{themeId} {
+      allow get: if isValidId(themeId) && (existing().status == 'published' || isDev());
+      allow list: if existing().status == 'published'
+        || (isVerifiedUser() && (existing().updatedByUid == request.auth.uid || request.auth.token.email == 'studiosmobile092@gmail.com' || request.auth.token.email == 'mobilelabscreator@gmail.com'));
+
+      allow create: if isValidId(themeId)
+        && isDev()
+        && isValidPublishedTheme(incoming(), themeId)
+        && incoming().createdByUid == request.auth.uid
+        && incoming().createdAt == request.time
+        && incoming().updatedAt == request.time;
+
+      allow update: if isValidId(themeId)
+        && isDev()
+        && isValidPublishedTheme(incoming(), themeId)
+        && incoming().id == existing().id
+        && incoming().createdByUid == existing().createdByUid
+        && incoming().createdAt == existing().createdAt
+        && incoming().updatedAt == request.time
+        && incoming().diff(existing()).affectedKeys().hasOnly([
+          'status',
+          'label',
+          'jpLabel',
+          'orbCost',
+          'isTransformationSkin',
+          'unlockRequirement',
+          'primary',
+          'bright',
+          'secondary',
+          'dim',
+          'onPrimary',
+          'bgAccentRgb',
+          'manifest',
+          'overdriveLayers',
+          'hideBuiltInFlames',
+          'shaderConfig',
+          'updatedByUid',
+          'updatedAt'
+        ]);
+
+      allow delete: if isValidId(themeId) && isDev();
+    }
+
+    match /published_hud_layouts/{layoutId} {
+      allow get: if isValidId(layoutId) && (existing().status == 'published' || isDev());
+      allow list: if existing().status == 'published'
+        || (isVerifiedUser() && (existing().updatedByUid == request.auth.uid || request.auth.token.email == 'studiosmobile092@gmail.com' || request.auth.token.email == 'mobilelabscreator@gmail.com'));
+
+      allow create: if isValidId(layoutId)
+        && isDev()
+        && isValidHudLayout(incoming(), layoutId)
+        && incoming().createdByUid == request.auth.uid
+        && incoming().createdAt == request.time
+        && incoming().updatedAt == request.time;
+
+      allow update: if isValidId(layoutId)
+        && isDev()
+        && isValidHudLayout(incoming(), layoutId)
+        && incoming().id == existing().id
+        && incoming().createdByUid == existing().createdByUid
+        && incoming().createdAt == existing().createdAt
+        && incoming().updatedAt == request.time
+        && incoming().diff(existing()).affectedKeys().hasOnly([
+          'status',
+          'name',
+          'widgets',
+          'devDockStyle',
+          'customDecorWidgets',
+          'updatedByUid',
+          'updatedAt'
+        ]);
+
+      allow delete: if isValidId(layoutId) && isDev();
+    }
+
+    match /dev_asset_library/{assetId} {
+      allow get: if isValidId(assetId) && (existing().status == 'published' || isDev());
+      allow list: if existing().status == 'published'
+        || (isVerifiedUser() && (existing().updatedByUid == request.auth.uid || request.auth.token.email == 'studiosmobile092@gmail.com' || request.auth.token.email == 'mobilelabscreator@gmail.com'));
+
+      allow create: if isValidId(assetId)
+        && isDev()
+        && isValidDevAsset(incoming(), assetId)
+        && incoming().createdByUid == request.auth.uid
+        && incoming().createdAt == request.time
+        && incoming().updatedAt == request.time;
+
+      allow update: if isValidId(assetId)
+        && isDev()
+        && isValidDevAsset(incoming(), assetId)
+        && incoming().id == existing().id
+        && incoming().createdByUid == existing().createdByUid
+        && incoming().createdAt == existing().createdAt
+        && incoming().updatedAt == request.time
+        && incoming().diff(existing()).affectedKeys().hasOnly([
+          'status',
+          'name',
+          'folder',
+          'kind',
+          'dataUrlOrPath',
+          'mimeType',
+          'sizeBytes',
+          'tags',
+          'updatedByUid',
+          'updatedAt'
+        ]);
+
+      allow delete: if isValidId(assetId) && isDev();
+    }
+
+    match /test/connection {
+      allow get: if true;
+      allow list, create, update, delete: if false;
+    }
+  }
+}

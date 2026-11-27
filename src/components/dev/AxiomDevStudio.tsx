@@ -1,0 +1,716 @@
+import React, { useEffect, useState } from 'react';
+import {
+  ChevronLeft,
+  ChevronRight,
+  CloudUpload,
+  Eye,
+  EyeOff,
+  Flame,
+  FolderKanban,
+  Layers,
+  LayoutGrid,
+  Monitor,
+  Move,
+  Music,
+  Palette,
+  PanelLeft,
+  RotateCcw,
+  Wrench,
+  X,
+  Zap,
+} from 'lucide-react';
+import { DEFAULT_DEV_DOCK_STYLE, WIDGET_CATALOG } from '../../store/studioRegistryStore';
+import {
+  DevAssetItem,
+  EditableThemePayload,
+  GameScreen,
+  PlayerProfile,
+  PublishedHudLayout,
+  SongDefinition,
+  ThemeId,
+} from '../../types/game';
+import { AssetVaultPanel } from './AssetVaultPanel';
+import { HudLayoutPanel } from './HudLayoutPanel';
+import { OverdriveStudioPanel } from './OverdriveStudioPanel';
+import { PublishSyncPanel } from './PublishSyncPanel';
+import { SongForgePanel } from './SongForgePanel';
+import { ThemeSculptorPanel } from './ThemeSculptorPanel';
+
+export type DevToolTabId =
+  | 'themes'
+  | 'overdrive'
+  | 'songs'
+  | 'assets'
+  | 'layout'
+  | 'publish';
+
+interface AxiomDevStudioProps {
+  open: boolean;
+  onToggleOpen: (open: boolean) => void;
+  activeTab: DevToolTabId;
+  onSelectTab: (tab: DevToolTabId) => void;
+  currentScreen?: GameScreen;
+  onSwitchScreen?: (screen: GameScreen) => void;
+  profile: PlayerProfile;
+  themesMap: Record<string, EditableThemePayload>;
+  songs: SongDefinition[];
+  selectedSongId: string;
+  hudLayout: PublishedHudLayout;
+  assets: DevAssetItem[];
+  editModeActive: boolean;
+  selectedWidgetId: string | null;
+  previewCharge: number | null;
+  previewActive: boolean;
+  draftSongsCount: number;
+  draftThemesCount: number;
+  hasDraftHud: boolean;
+  draftAssetsCount: number;
+  exportSongs: SongDefinition[];
+  exportThemes: EditableThemePayload[];
+  onToggleEditMode: () => void;
+  onSelectWidget: (widgetId: string) => void;
+  onUpdateHudLayout: (next: PublishedHudLayout) => void;
+  onSafeResetLayout: () => void;
+  onSaveThemeDraft: (theme: EditableThemePayload) => void;
+  onResetBuiltInTheme: (id: ThemeId) => void;
+  onApplyPlayerTheme: (id: ThemeId) => void;
+  onSaveSongDraft: (song: SongDefinition) => void;
+  onSelectSong: (songId: string) => void;
+  onPlaytestSong: (song: SongDefinition, startOffsetSec?: number) => void;
+  onUpsertAsset: (asset: DevAssetItem) => void;
+  onDeleteAsset: (assetId: string) => void;
+  onChangePreviewCharge: (val: number | null) => void;
+  onTogglePreviewActive: (active: boolean) => void;
+  onPublishAllCloud: () => Promise<string>;
+  onDiscardDrafts: () => void;
+}
+
+const TOOL_TABS: {
+  id: DevToolTabId;
+  label: string;
+  icon: React.ComponentType<{ className?: string }>;
+}[] = [
+  { id: 'themes', label: 'Themes', icon: Palette },
+  { id: 'overdrive', label: 'Overdrive', icon: Flame },
+  { id: 'songs', label: 'Songs', icon: Music },
+  { id: 'assets', label: 'Assets', icon: FolderKanban },
+  { id: 'layout', label: 'HUD Edit', icon: LayoutGrid },
+  { id: 'publish', label: 'Publish', icon: CloudUpload },
+];
+
+const SCREEN_VIEWS: { id: GameScreen; label: string }[] = [
+  { id: 'TITLE', label: 'Title' },
+  { id: 'SONG_SELECT', label: 'Tracks' },
+  { id: 'PLAYING', label: 'Stage' },
+  { id: 'SHOP', label: 'Shop' },
+  { id: 'INDEX', label: 'Index' },
+  { id: 'SETTINGS', label: 'Settings' },
+];
+
+export const AxiomDevStudio: React.FC<AxiomDevStudioProps> = (props) => {
+  const {
+    open,
+    onToggleOpen,
+    activeTab,
+    onSelectTab,
+    currentScreen,
+    onSwitchScreen,
+    profile,
+    themesMap,
+    songs,
+    selectedSongId,
+    hudLayout,
+    assets,
+    editModeActive,
+    selectedWidgetId,
+    previewCharge,
+    previewActive,
+    onToggleEditMode,
+    onSafeResetLayout,
+  } = props;
+
+  const [editThemeId, setEditThemeId] = useState<ThemeId>(profile.theme);
+  const [workspaceMode, setWorkspaceMode] = useState<'engine' | 'overlay'>('engine');
+  const [showHierarchy, setShowHierarchy] = useState(() =>
+    typeof window !== 'undefined' ? window.innerWidth >= 1120 : true,
+  );
+  const [showInspector, setShowInspector] = useState(true);
+
+  useEffect(() => {
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.code === 'F8') {
+        e.preventDefault();
+        onToggleOpen(!open);
+      }
+    };
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, [open, onToggleOpen]);
+
+  const dock = hudLayout.devDockStyle || DEFAULT_DEV_DOCK_STYLE;
+  const totalDrafts =
+    props.draftSongsCount +
+    props.draftThemesCount +
+    (props.hasDraftHud ? 1 : 0) +
+    props.draftAssetsCount;
+
+  // Compact launcher chip when studio is collapsed
+  if (!open) {
+    return (
+      <div className="fixed left-3 bottom-3 z-[70] flex items-center gap-1.5">
+        <button
+          type="button"
+          onClick={() => onToggleOpen(true)}
+          className="flex items-center gap-2 border border-white bg-black px-3 py-2 font-mono text-xs font-black text-white shadow-xl cursor-pointer transition-colors hover:bg-white hover:text-black"
+        >
+          <Wrench className="h-3.5 w-3.5" />
+          <span>DEV STUDIO</span>
+          {totalDrafts > 0 && (
+            <span className="bg-[#38BDF8] px-1.5 py-0.5 text-[10px] font-extrabold text-slate-950">
+              {totalDrafts}
+            </span>
+          )}
+        </button>
+        {editModeActive && (
+          <button
+            type="button"
+            onClick={onToggleEditMode}
+            className="border border-[#38BDF8] bg-[#38BDF8] px-2.5 py-2 font-mono text-xs font-bold text-slate-950 shadow-xl cursor-pointer"
+          >
+            EXIT EDIT
+          </button>
+        )}
+      </div>
+    );
+  }
+
+  const assignAssetToOverdrive = (asset: DevAssetItem) => {
+    const theme = themesMap[profile.theme] || Object.values(themesMap)[0];
+    if (!theme) return;
+    const nextLayers = [
+      ...(theme.overdriveLayers || []),
+      {
+        id: `od_${Date.now().toString().slice(-6)}`,
+        name: asset.name.replace(/\.[^.]+$/, ''),
+        imageUrl: asset.dataUrlOrPath,
+        anchor: 'bottom_border' as const,
+        animation: 'flame_rise' as const,
+        blendMode: 'screen' as const,
+        opacity: 0.9,
+        scale: 1,
+        speed: 1,
+        buildupMinOpacity: 0.14,
+        eruptBoost: 1.25,
+        enabled: true,
+      },
+    ];
+    props.onSaveThemeDraft({ ...theme, status: 'draft', overdriveLayers: nextLayers });
+    onSelectTab('overdrive');
+    if (previewCharge === null) props.onChangePreviewCharge(0.85);
+  };
+
+  const assignAssetToThemeBackdrop = (asset: DevAssetItem) => {
+    const theme = themesMap[editThemeId] || themesMap[profile.theme];
+    if (!theme) return;
+    props.onSaveThemeDraft({
+      ...theme,
+      status: 'draft',
+      isTransformationSkin: true,
+      manifest: {
+        ...theme.manifest,
+        isFullTransformation: true,
+        backdropImageUrl: asset.dataUrlOrPath,
+      },
+    });
+    onSelectTab('themes');
+  };
+
+  const assignAssetToThemeOrnament = (asset: DevAssetItem) => {
+    const theme = themesMap[editThemeId] || themesMap[profile.theme];
+    if (!theme) return;
+    props.onSaveThemeDraft({
+      ...theme,
+      status: 'draft',
+      isTransformationSkin: true,
+      manifest: {
+        ...theme.manifest,
+        isFullTransformation: true,
+        ornamentImageUrl: asset.dataUrlOrPath,
+      },
+    });
+    onSelectTab('themes');
+  };
+
+  const activeThemePayload = themesMap[profile.theme];
+  const visibleWidgets = WIDGET_CATALOG.filter(
+    (w) => !currentScreen || w.screen === currentScreen || w.screen === 'GLOBAL',
+  );
+
+  const toggleWidgetVisible = (widgetId: string) => {
+    const prev = hudLayout.widgets[widgetId] || {
+      widgetId,
+      xOffsetPx: 0,
+      yOffsetPx: 0,
+      scale: 1,
+      opacity: 1,
+      visible: true,
+    };
+    props.onUpdateHudLayout({
+      ...hudLayout,
+      status: 'draft',
+      widgets: {
+        ...hudLayout.widgets,
+        [widgetId]: { ...prev, visible: !prev.visible },
+      },
+    });
+  };
+
+  const inspectorBody = (
+    <div className="orbit-scroll flex-1 overflow-y-auto p-3">
+      {activeTab === 'themes' && (
+        <ThemeSculptorPanel
+          themesMap={themesMap}
+          selectedThemeId={editThemeId}
+          activePlayerTheme={profile.theme}
+          assets={assets}
+          onSelectEditTheme={setEditThemeId}
+          onApplyPlayerTheme={props.onApplyPlayerTheme}
+          onSaveThemeDraft={props.onSaveThemeDraft}
+          onResetBuiltInTheme={props.onResetBuiltInTheme}
+        />
+      )}
+
+      {activeTab === 'overdrive' && (
+        <OverdriveStudioPanel
+          themesMap={themesMap}
+          activePlayerTheme={profile.theme}
+          assets={assets}
+          previewCharge={previewCharge}
+          previewActive={previewActive}
+          onChangePreviewCharge={props.onChangePreviewCharge}
+          onTogglePreviewActive={props.onTogglePreviewActive}
+          onSaveThemeDraft={props.onSaveThemeDraft}
+          onApplyPlayerTheme={props.onApplyPlayerTheme}
+        />
+      )}
+
+      {activeTab === 'songs' && (
+        <SongForgePanel
+          songs={songs}
+          selectedSongId={selectedSongId}
+          assets={assets}
+          profile={profile}
+          onSaveSongDraft={props.onSaveSongDraft}
+          onSelectSong={props.onSelectSong}
+          onPlaytestSong={props.onPlaytestSong}
+        />
+      )}
+
+      {activeTab === 'assets' && (
+        <AssetVaultPanel
+          assets={assets}
+          onUpsertAsset={props.onUpsertAsset}
+          onDeleteAsset={props.onDeleteAsset}
+          onAssignToOverdrive={assignAssetToOverdrive}
+          onAssignToThemeBackdrop={assignAssetToThemeBackdrop}
+          onAssignToThemeOrnament={assignAssetToThemeOrnament}
+        />
+      )}
+
+      {activeTab === 'layout' && (
+        <HudLayoutPanel
+          hudLayout={hudLayout}
+          editModeActive={editModeActive}
+          selectedWidgetId={selectedWidgetId}
+          assets={assets}
+          onToggleEditMode={onToggleEditMode}
+          onSelectWidget={props.onSelectWidget}
+          onUpdateLayout={props.onUpdateHudLayout}
+          onSafeResetLayout={onSafeResetLayout}
+        />
+      )}
+
+      {activeTab === 'publish' && (
+        <PublishSyncPanel
+          draftSongsCount={props.draftSongsCount}
+          draftThemesCount={props.draftThemesCount}
+          hasDraftHud={props.hasDraftHud}
+          draftAssetsCount={props.draftAssetsCount}
+          exportSongs={props.exportSongs}
+          exportThemes={props.exportThemes}
+          hudLayout={hudLayout}
+          assets={assets}
+          onPublishAllCloud={props.onPublishAllCloud}
+          onDiscardDrafts={props.onDiscardDrafts}
+        />
+      )}
+    </div>
+  );
+
+  // Floating Overlay Mode (compact single-side inspector)
+  if (workspaceMode === 'overlay') {
+    return (
+      <>
+        <nav
+          aria-label="Axiom Dev Tool Rail"
+          className="fixed left-3 top-1/2 -translate-y-1/2 z-[75] flex flex-col gap-1 border p-1.5 shadow-2xl"
+          style={{
+            backgroundColor: dock.bgColor,
+            borderColor: dock.borderColor,
+            opacity: dock.opacity,
+            backdropFilter: `blur(${dock.blurPx}px)`,
+          }}
+        >
+          {TOOL_TABS.map((tab) => {
+            const Icon = tab.icon;
+            const active = activeTab === tab.id;
+            return (
+              <button
+                key={tab.id}
+                type="button"
+                onClick={() => onSelectTab(tab.id)}
+                className={`flex h-11 w-12 flex-col items-center justify-center gap-0.5 border cursor-pointer ${
+                  active
+                    ? 'bg-[#38BDF8] border-[#38BDF8] text-slate-950 font-bold'
+                    : 'border-transparent text-slate-300 hover:border-slate-600 hover:text-white'
+                }`}
+              >
+                <Icon className="h-4 w-4" />
+                <span className="font-mono text-[8px] uppercase leading-none">{tab.label}</span>
+              </button>
+            );
+          })}
+          <div className="my-1 h-px bg-slate-700" />
+          <button
+            type="button"
+            onClick={() => setWorkspaceMode('engine')}
+            title="Switch to Full Game Engine Workspace"
+            className="flex h-10 w-12 flex-col items-center justify-center border border-white/40 bg-black text-white hover:bg-white hover:text-black cursor-pointer"
+          >
+            <Monitor className="h-3.5 w-3.5" />
+            <span className="font-mono text-[7px] uppercase">ENGINE</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => onToggleOpen(false)}
+            className="flex h-9 w-12 items-center justify-center border border-slate-700 bg-slate-900 text-slate-300 hover:text-white cursor-pointer"
+          >
+            <X className="h-4 w-4" />
+          </button>
+        </nav>
+
+        <aside
+          aria-label="Axiom Dev Inspector"
+          className="fixed left-[72px] top-4 bottom-4 z-[74] flex w-[min(90vw,390px)] flex-col border shadow-2xl"
+          style={{
+            backgroundColor: dock.bgColor,
+            borderColor: dock.borderColor,
+            opacity: dock.opacity,
+            backdropFilter: `blur(${dock.blurPx}px)`,
+          }}
+        >
+          <header className="flex items-center justify-between border-b border-slate-700 px-3.5 py-2.5">
+            <div className="flex items-center gap-2">
+              <Wrench className="h-4 w-4 text-[#38BDF8]" />
+              <h2 className="font-mono text-xs font-extrabold uppercase tracking-wider text-white">
+                ORBIT AXIOM STUDIO
+              </h2>
+            </div>
+            <button
+              type="button"
+              onClick={() => onToggleOpen(false)}
+              className="border border-slate-700 bg-slate-900 p-1 text-slate-300 hover:text-white cursor-pointer"
+            >
+              <X className="h-3.5 w-3.5" />
+            </button>
+          </header>
+          {inspectorBody}
+        </aside>
+      </>
+    );
+  }
+
+  // Full 3-Pane Collapsible Game Engine View
+  return (
+    <>
+      {/* TOP ENGINE TOOLBAR */}
+      <header className="fixed inset-x-0 top-0 z-[76] flex h-11 items-center justify-between gap-2 border-b border-white/25 bg-[#050608]/95 px-2.5 backdrop-blur-md">
+        <div className="flex items-center gap-2 min-w-0">
+          <span className="flex items-center gap-1.5 border border-white bg-black px-2.5 py-1 font-mono text-[10px] font-black tracking-widest text-white whitespace-nowrap">
+            <Wrench className="h-3 w-3" />
+            <span>ORBIT ENGINE</span>
+          </span>
+
+          <button
+            type="button"
+            onClick={() => setShowHierarchy((v) => !v)}
+            title="Toggle Scene Hierarchy Panel"
+            className={`hidden sm:flex items-center gap-1 border px-2 py-1 font-mono text-[10px] font-bold cursor-pointer whitespace-nowrap ${
+              showHierarchy
+                ? 'border-white/50 bg-white/15 text-white'
+                : 'border-white/20 bg-black text-slate-400 hover:text-white'
+            }`}
+          >
+            <PanelLeft className="h-3 w-3" />
+            <span>Hierarchy</span>
+          </button>
+
+          {/* Live Screen Switcher */}
+          {onSwitchScreen && (
+            <div className="flex items-center gap-1 overflow-x-auto">
+              {SCREEN_VIEWS.map((scr) => {
+                const active = currentScreen === scr.id;
+                return (
+                  <button
+                    key={scr.id}
+                    type="button"
+                    onClick={() => onSwitchScreen(scr.id)}
+                    className={`border px-2 py-1 font-mono text-[10px] font-bold uppercase cursor-pointer whitespace-nowrap ${
+                      active
+                        ? 'border-white bg-white text-black'
+                        : 'border-white/15 bg-black/70 text-slate-300 hover:border-white/45 hover:text-white'
+                    }`}
+                  >
+                    {scr.label}
+                  </button>
+                );
+              })}
+            </div>
+          )}
+        </div>
+
+        {/* Center/Right Engine Quick Actions */}
+        <div className="flex items-center gap-1.5 shrink-0">
+          {/* Quick Overdrive Live Shader Test */}
+          <div className="hidden lg:flex items-center gap-1.5 border border-white/15 bg-black/80 px-2 py-0.5">
+            <Flame className="h-3 w-3 text-amber-400" />
+            <input
+              type="range"
+              min={0}
+              max={100}
+              value={previewCharge === null ? 0 : Math.round(previewCharge * 100)}
+              onChange={(e) => {
+                const v = Number(e.target.value) / 100;
+                props.onChangePreviewCharge(v <= 0.01 ? null : v);
+              }}
+              aria-label="Engine Overdrive Preview Level"
+              className="w-16 accent-amber-400"
+            />
+            <button
+              type="button"
+              onClick={() => {
+                if (previewCharge === null) props.onChangePreviewCharge(1);
+                props.onTogglePreviewActive(!previewActive);
+              }}
+              className={`flex items-center gap-1 border px-1.5 py-0.5 font-mono text-[9px] font-black cursor-pointer ${
+                previewActive
+                  ? 'border-amber-300 bg-amber-400 text-black'
+                  : 'border-amber-500/40 bg-amber-500/15 text-amber-300'
+              }`}
+            >
+              <Zap className="h-2.5 w-2.5" />
+              <span>ERUPT</span>
+            </button>
+          </div>
+
+          <button
+            type="button"
+            onClick={onToggleEditMode}
+            className={`flex items-center gap-1 border px-2 py-1 font-mono text-[10px] font-bold cursor-pointer whitespace-nowrap ${
+              editModeActive
+                ? 'border-amber-300 bg-amber-400 text-black'
+                : 'border-white/25 bg-black text-white hover:border-white'
+            }`}
+          >
+            <Move className="h-3 w-3" />
+            <span className="hidden md:inline">Gizmos</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => {
+              onSelectTab('publish');
+              setShowInspector(true);
+            }}
+            className="flex items-center gap-1 border border-emerald-400/70 bg-emerald-500/20 px-2.5 py-1 font-mono text-[10px] font-bold text-emerald-200 hover:bg-emerald-500/35 cursor-pointer whitespace-nowrap"
+          >
+            <CloudUpload className="h-3 w-3" />
+            <span>Push ({totalDrafts})</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setWorkspaceMode('overlay')}
+            title="Switch to Compact Floating Dock"
+            className="hidden sm:flex items-center border border-white/20 bg-black px-2 py-1 font-mono text-[10px] text-slate-300 hover:text-white cursor-pointer"
+          >
+            Dock
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setShowInspector((v) => !v)}
+            title="Toggle Right Inspector"
+            className="flex items-center border border-white/20 bg-black p-1 text-slate-300 hover:text-white cursor-pointer"
+          >
+            {showInspector ? <ChevronRight className="h-3.5 w-3.5" /> : <ChevronLeft className="h-3.5 w-3.5" />}
+          </button>
+
+          <button
+            type="button"
+            onClick={() => onToggleOpen(false)}
+            title="Exit Dev Studio (F8)"
+            className="flex items-center gap-1 border border-white bg-white px-2 py-1 font-mono text-[10px] font-black text-black hover:bg-black hover:text-white cursor-pointer"
+          >
+            <X className="h-3 w-3" />
+            <span className="hidden sm:inline">Exit</span>
+          </button>
+        </div>
+      </header>
+
+      {/* LEFT SCENE HIERARCHY PANE */}
+      {showHierarchy && (
+        <aside
+          aria-label="Scene Hierarchy"
+          className="orbit-scroll fixed left-0 top-11 bottom-0 z-[74] flex w-56 flex-col border-r border-white/20 bg-[#080a0f]/94 backdrop-blur-md"
+        >
+          <div className="flex items-center justify-between border-b border-white/15 px-3 py-2">
+            <span className="flex items-center gap-1.5 font-mono text-[10px] font-black uppercase tracking-wider text-white">
+              <Layers className="h-3.5 w-3.5 text-[#38BDF8]" />
+              <span>Hierarchy · {currentScreen || 'LIVE'}</span>
+            </span>
+          </div>
+
+          <div className="orbit-scroll flex-1 overflow-y-auto p-2.5 space-y-3 text-xs">
+            <div className="space-y-1">
+              <span className="block px-1 font-mono text-[9px] font-bold uppercase text-slate-400">
+                Active Screen Slots ({visibleWidgets.length})
+              </span>
+              {visibleWidgets.map((w) => {
+                const ov = hudLayout.widgets[w.widgetId];
+                const isVis = ov?.visible ?? true;
+                const isSel = selectedWidgetId === w.widgetId;
+                return (
+                  <div
+                    key={w.widgetId}
+                    className={`flex items-center justify-between gap-1 border px-2 py-1.5 ${
+                      isSel
+                        ? 'border-[#38BDF8] bg-[#38BDF8]/15 text-white'
+                        : 'border-white/10 bg-black/50 text-slate-300 hover:border-white/30'
+                    }`}
+                  >
+                    <button
+                      type="button"
+                      onClick={() => {
+                        props.onSelectWidget(w.widgetId);
+                        onSelectTab('layout');
+                        setShowInspector(true);
+                      }}
+                      className="min-w-0 flex-1 truncate text-left font-mono text-[10px] cursor-pointer"
+                    >
+                      {w.label.split('·').pop()?.trim() || w.label}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => toggleWidgetVisible(w.widgetId)}
+                      title={isVis ? 'Hide Slot' : 'Show Slot'}
+                      className="text-slate-400 hover:text-white cursor-pointer"
+                    >
+                      {isVis ? <Eye className="h-3 w-3 text-emerald-400" /> : <EyeOff className="h-3 w-3 text-rose-400" />}
+                    </button>
+                  </div>
+                );
+              })}
+            </div>
+
+            <div className="space-y-1 border-t border-white/10 pt-2">
+              <span className="block px-1 font-mono text-[9px] font-bold uppercase text-slate-400">
+                Render Layers ({profile.theme})
+              </span>
+              <button
+                type="button"
+                onClick={() => {
+                  onSelectTab('themes');
+                  setShowInspector(true);
+                }}
+                className="flex w-full items-center justify-between border border-white/10 bg-black/50 px-2 py-1.5 font-mono text-[10px] text-slate-200 hover:border-white/35 cursor-pointer"
+              >
+                <span>Skin &amp; Atmosphere GL2</span>
+                <span className="text-[#38BDF8]">Edit</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  onSelectTab('overdrive');
+                  setShowInspector(true);
+                }}
+                className="flex w-full items-center justify-between border border-white/10 bg-black/50 px-2 py-1.5 font-mono text-[10px] text-slate-200 hover:border-white/35 cursor-pointer"
+              >
+                <span>Overdrive Shader GL2</span>
+                <span className="text-amber-300">
+                  {(activeThemePayload?.overdriveLayers?.length || 0)} FX
+                </span>
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  onSelectTab('songs');
+                  setShowInspector(true);
+                }}
+                className="flex w-full items-center justify-between border border-white/10 bg-black/50 px-2 py-1.5 font-mono text-[10px] text-slate-200 hover:border-white/35 cursor-pointer"
+              >
+                <span>Active Chart &amp; Audio</span>
+                <span className="text-emerald-300">Open</span>
+              </button>
+            </div>
+          </div>
+
+          <div className="border-t border-white/15 p-2 flex items-center justify-between">
+            <button
+              type="button"
+              onClick={onSafeResetLayout}
+              className="flex items-center gap-1 font-mono text-[10px] text-slate-400 hover:text-white cursor-pointer"
+            >
+              <RotateCcw className="h-3 w-3" />
+              <span>Safe Reset</span>
+            </button>
+            <span className="font-mono text-[9px] text-slate-500">F8</span>
+          </div>
+        </aside>
+      )}
+
+      {/* RIGHT INSPECTOR PANE */}
+      {showInspector && (
+        <aside
+          aria-label="Axiom Dev Inspector"
+          className="fixed right-0 top-11 bottom-0 z-[74] flex w-[min(92vw,370px)] flex-col border-l border-white/20 bg-[#080a0f]/95 shadow-2xl backdrop-blur-md"
+        >
+          <div className="grid grid-cols-6 border-b border-white/15 bg-black/75">
+            {TOOL_TABS.map((tab) => {
+              const Icon = tab.icon;
+              const active = activeTab === tab.id;
+              return (
+                <button
+                  key={tab.id}
+                  type="button"
+                  onClick={() => onSelectTab(tab.id)}
+                  className={`flex flex-col items-center justify-center gap-0.5 border-b-2 py-2 cursor-pointer transition-colors ${
+                    active
+                      ? 'border-white bg-white text-black font-black'
+                      : 'border-transparent text-slate-400 hover:bg-white/5 hover:text-white'
+                  }`}
+                >
+                  <Icon className="h-3.5 w-3.5" />
+                  <span className="font-mono text-[8px] uppercase leading-none">
+                    {tab.label}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+          {inspectorBody}
+        </aside>
+      )}
+    </>
+  );
+};
