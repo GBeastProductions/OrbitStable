@@ -103,6 +103,7 @@ export const TitleScreen: React.FC<TitleScreenProps> = React.memo(
           ? 'Moments Passing Us · Calibration'
           : `${activeSong.title} · ${activeSong.artist}`,
         primary: true,
+        accentVariant: 'bow_star' as const,
         offsetClass: 'ml-0',
         onClick: onPlayPrimary,
         renderIcon: () => <Play className="h-4 w-4 sm:h-5 sm:w-5 shrink-0 text-white" />,
@@ -112,7 +113,8 @@ export const TitleScreen: React.FC<TitleScreenProps> = React.memo(
         label: 'Track Select',
         sub: `${songs.length} Songs · Daily, Weekly Demon & Arcade`,
         primary: false,
-        offsetClass: 'sm:ml-4',
+        accentVariant: 'holly_star' as const,
+        offsetClass: 'sm:ml-3',
         onClick: onEnterSongSelect,
         renderIcon: () => (
           <ListMusic className="h-4 w-4 sm:h-5 sm:w-5 shrink-0 text-[var(--accent-bright)]" />
@@ -123,7 +125,8 @@ export const TitleScreen: React.FC<TitleScreenProps> = React.memo(
         label: 'Orb Shop',
         sub: `${profile.orbs.toLocaleString()} Orbs · Mods, Themes & Tracks`,
         primary: false,
-        offsetClass: 'sm:ml-8',
+        accentVariant: 'minimal' as const,
+        offsetClass: 'sm:ml-6',
         onClick: onOpenOrbVault,
         renderIcon: () => <OrbIcon className="h-5 w-5 shrink-0 !text-white text-white" />,
       },
@@ -132,7 +135,8 @@ export const TitleScreen: React.FC<TitleScreenProps> = React.memo(
         label: 'The Index',
         sub: `${WAVE_MODES.length} Mechanics · ${profile.unlockedBadges.length}/${BADGE_CATALOG.length} Badges & Stats`,
         primary: false,
-        offsetClass: 'sm:ml-12',
+        accentVariant: 'minimal' as const,
+        offsetClass: 'sm:ml-9',
         onClick: onOpenIndex,
         renderIcon: () => <IndexIcon className="h-5 w-5 shrink-0 !text-white text-white" />,
       },
@@ -141,7 +145,8 @@ export const TitleScreen: React.FC<TitleScreenProps> = React.memo(
         label: 'Settings',
         sub: 'Audio · Keybinds · Calibration',
         primary: false,
-        offsetClass: 'sm:ml-16',
+        accentVariant: 'holly_star' as const,
+        offsetClass: 'sm:ml-12',
         onClick: onOpenSettings,
         renderIcon: () => (
           <Settings className="h-4 w-4 sm:h-5 sm:w-5 shrink-0 text-[var(--accent-bright)]" />
@@ -157,42 +162,98 @@ export const TitleScreen: React.FC<TitleScreenProps> = React.memo(
           className="pointer-events-none absolute inset-0"
           style={{
             background: isChristmas
-              ? 'radial-gradient(circle at 26% 52%, rgba(251, 191, 36, 0.16) 0%, rgba(225, 29, 72, 0.10) 28%, transparent 56%, rgba(8, 7, 16, 0.56) 94%)'
+              ? 'radial-gradient(circle at 26% 52%, rgba(251, 191, 36, 0.18) 0%, rgba(225, 29, 72, 0.10) 28%, transparent 56%, rgba(8, 7, 16, 0.56) 94%)'
               : skin.isFullTransformation
               ? `radial-gradient(circle at 28% 52%, rgba(${theme.bgAccentRgb}, 0.22) 0%, transparent 48%, rgba(7,8,13,0.45) 86%)`
               : `radial-gradient(circle at 28% 52%, rgba(${theme.bgAccentRgb}, 0.20) 0%, rgba(34, 211, 238, 0.06) 38%, rgba(7,8,13,0.78) 78%)`,
           }}
         />
 
-        {/* COZY CHRISTMAS MIDGROUND DIORAMA: Snowman, Lanterns, Gifts & Glowing Pines in Between Sky & UI */}
+        {/* COZY CHRISTMAS GROUNDED COURTYARD DIORAMA (Layered cleanly between sky & foreground UI) */}
         {isChristmas && (
           <div
             aria-hidden="true"
             className="pointer-events-none absolute inset-0 z-[11] overflow-hidden"
           >
-            {/* Glowing Snowman, Tree & Lantern Terrace flanking lower-center beside the disc */}
-            <img
-              src={XMAS_SPRITES.dioramaScene}
-              alt=""
-              className="hidden md:block absolute bottom-8 left-[24%] lg:left-[26%] h-44 lg:h-60 w-auto object-contain opacity-95 drop-shadow-[0_10px_28px_rgba(0,0,0,0.8)]"
-            />
-            {/* Tall glowing Christmas tree peeking cleanly behind upper-right blade column */}
-            <img
-              src={XMAS_SPRITES.treeOrnate}
-              alt=""
-              className="hidden lg:block absolute right-[28%] top-[14%] h-[62vh] max-h-[520px] w-auto object-contain opacity-90 drop-shadow-[0_0_32px_rgba(251,191,36,0.42)]"
-            />
-            {/* Warm Vintage Street Lantern & Presents flanking lower-left corner */}
-            <img
-              src={XMAS_SPRITES.lantern}
-              alt=""
-              className="hidden sm:block absolute bottom-12 left-4 h-28 lg:h-36 w-auto object-contain drop-shadow-[0_0_24px_rgba(251,191,36,0.8)]"
-            />
-            <img
-              src={XMAS_SPRITES.giftBox}
-              alt=""
-              className="hidden sm:block absolute bottom-10 left-16 h-14 w-14 object-contain drop-shadow-[0_6px_14px_rgba(0,0,0,0.75)]"
-            />
+            {/* Courtyard Balcony Railing behind snowman/gifts matching concept art */}
+            <svg
+              viewBox="0 0 1600 900"
+              preserveAspectRatio="xMidYMid slice"
+              className="hidden md:block absolute inset-0 h-full w-full opacity-55"
+            >
+              <g stroke="#1b1426" strokeWidth="4">
+                <line x1="560" y1="670" x2="1020" y2="670" strokeWidth="6" />
+                <line x1="560" y1="735" x2="1020" y2="735" strokeWidth="5" />
+                {[580, 620, 660, 700, 740, 780, 820, 860, 900, 940, 980].map((rx) => (
+                  <line key={rx} x1={rx} y1="670" x2={rx} y2="755" />
+                ))}
+              </g>
+            </svg>
+
+            {/* Right Tall Lit Christmas Tree nestled seamlessly behind Menu Blade Cascade */}
+            <div className="hidden lg:block absolute right-[25%] bottom-[78px]">
+              <div
+                className="absolute -inset-6 rounded-full opacity-45 blur-2xl"
+                style={{
+                  background:
+                    'radial-gradient(circle, rgba(251,191,36,0.48) 0%, rgba(225,29,72,0.18) 55%, transparent 78%)',
+                }}
+              />
+              <img
+                src={XMAS_SPRITES.treeOrnate}
+                alt=""
+                className="relative h-[56vh] max-h-[480px] w-auto object-contain opacity-95 drop-shadow-[0_12px_32px_rgba(0,0,0,0.8)]"
+              />
+              <img
+                src={XMAS_SPRITES.sparkleGold}
+                alt=""
+                className="absolute -top-6 left-1/2 -translate-x-1/2 h-11 w-11 object-contain drop-shadow-[0_0_16px_rgba(253,224,71,0.95)]"
+              />
+            </div>
+
+            {/* Left Evergreen Shoulder + Wrapped Gifts + Glowing Street Lantern flanking lower-left disc */}
+            <div className="hidden sm:flex items-end absolute left-2 bottom-[50px] gap-1">
+              <img
+                src={XMAS_SPRITES.treeOrnate}
+                alt=""
+                className="h-44 lg:h-56 w-auto object-contain opacity-90 drop-shadow-[0_10px_24px_rgba(0,0,0,0.85)]"
+              />
+              <img
+                src={XMAS_SPRITES.giftTrio}
+                alt=""
+                className="-ml-12 mb-1 h-16 lg:h-20 w-auto object-contain drop-shadow-[0_8px_16px_rgba(0,0,0,0.85)]"
+              />
+            </div>
+
+            {/* Grounded Winter Terrace Snowman + Warm Lantern + Present Cluster (center-left floor) */}
+            <div className="hidden md:flex items-end absolute left-[28%] lg:left-[30%] bottom-[54px] gap-1.5">
+              {/* Soft ground contact shadow */}
+              <div
+                className="pointer-events-none absolute -bottom-2 -left-4 -right-6 h-5 rounded-full blur-md"
+                style={{ background: 'rgba(6, 5, 14, 0.72)' }}
+              />
+              <div className="relative flex flex-col items-center">
+                <div
+                  className="absolute -inset-4 rounded-full opacity-55 blur-xl"
+                  style={{ background: 'rgba(251, 191, 36, 0.42)' }}
+                />
+                <img
+                  src={XMAS_SPRITES.lantern}
+                  alt=""
+                  className="relative h-20 lg:h-24 w-auto object-contain drop-shadow-[0_0_18px_rgba(251,191,36,0.9)]"
+                />
+              </div>
+              <img
+                src={XMAS_SPRITES.snowmanClean}
+                alt=""
+                className="relative h-36 lg:h-48 w-auto object-contain drop-shadow-[0_10px_22px_rgba(0,0,0,0.8)]"
+              />
+              <img
+                src={XMAS_SPRITES.giftTrio}
+                alt=""
+                className="relative -ml-3 mb-1 h-14 lg:h-16 w-auto object-contain drop-shadow-[0_6px_14px_rgba(0,0,0,0.85)]"
+              />
+            </div>
           </div>
         )}
 
@@ -210,28 +271,36 @@ export const TitleScreen: React.FC<TitleScreenProps> = React.memo(
             <ThemeTitleLogo themeId={profile.theme} accentColor={theme.bright} />
           </StudioSlot>
 
-          {/* Zone 2: Quiet Unboxed Career Telemetry */}
-          <div className="hidden md:flex items-center gap-4 text-xs text-[#e2e8f0] tabular-nums whitespace-nowrap">
-            <span>
-              <strong className="font-extrabold" style={{ color: prestige.tierColor }}>
-                {prestige.tierTitle}
-              </strong>
-              <span className="ml-1.5 text-[#cbd5e1]">
-                SS {prestige.ssCount}/{prestige.totalSongsCount}
+          {/* Zone 2: Ornate Stats Bar (Christmas Champagne-Gold Pill / Clean Arcade Strip) */}
+          <div
+            className={`hidden md:flex items-center gap-3.5 text-xs tabular-nums whitespace-nowrap ${
+              isChristmas
+                ? 'lazer-slant-sm border border-[#fde68a]/55 bg-[#190a14]/90 px-5 py-1.5 text-[#fef3c7] shadow-[0_6px_22px_rgba(0,0,0,0.65)]'
+                : 'text-[#e2e8f0]'
+            }`}
+          >
+            <span className={isChristmas ? 'lazer-unslant-sm flex items-center gap-3.5' : 'flex items-center gap-4'}>
+              <span>
+                <strong className="font-extrabold" style={{ color: prestige.tierColor }}>
+                  {prestige.tierTitle}
+                </strong>
+                <span className="ml-1.5 text-[#cbd5e1]">
+                  SS {prestige.ssCount}/{prestige.totalSongsCount}
+                </span>
               </span>
-            </span>
-            <span aria-hidden="true" className="text-white/30">·</span>
-            <span>
-              Best <strong className="ml-1 font-bold text-white">{profile.bestScore.toLocaleString()}</strong>
-            </span>
-            <span aria-hidden="true" className="text-white/30">·</span>
-            <span>
-              Peak Combo <strong className="ml-1 font-bold text-[#fde68a]">{profile.bestStreak}x</strong>
-            </span>
-            <span aria-hidden="true" className="text-white/30">·</span>
-            <span className="inline-flex items-center gap-1.5">
-              <OrbIcon className="h-4 w-4 text-white" />
-              <strong className="font-bold text-white">{profile.orbs.toLocaleString()}</strong>
+              <span aria-hidden="true" className={isChristmas ? 'text-[#fde68a]/65' : 'text-white/30'}>✦</span>
+              <span>
+                Best <strong className="ml-1 font-bold text-white">{profile.bestScore.toLocaleString()}</strong>
+              </span>
+              <span aria-hidden="true" className={isChristmas ? 'text-[#fde68a]/65' : 'text-white/30'}>✦</span>
+              <span>
+                Peak Combo <strong className="ml-1 font-bold text-[#fde68a]">{profile.bestStreak}x</strong>
+              </span>
+              <span aria-hidden="true" className={isChristmas ? 'text-[#fde68a]/65' : 'text-white/30'}>✦</span>
+              <span className="inline-flex items-center gap-1.5">
+                <OrbIcon className="h-4 w-4 text-[#fde68a]" />
+                <strong className="font-bold text-white">{profile.orbs.toLocaleString()}</strong>
+              </span>
             </span>
           </div>
 
@@ -243,10 +312,10 @@ export const TitleScreen: React.FC<TitleScreenProps> = React.memo(
               className="tactile-btn lazer-slant-sm relative flex items-center gap-2 border px-4 py-2 text-xs font-semibold text-white hover:border-[var(--accent-bright)] cursor-pointer whitespace-nowrap shrink-0"
               style={{
                 background: isChristmas
-                  ? 'linear-gradient(125deg, rgba(44, 15, 28, 0.92), rgba(20, 14, 28, 0.92))'
+                  ? 'linear-gradient(125deg, rgba(102, 18, 38, 0.92), rgba(24, 10, 22, 0.94))'
                   : undefined,
                 backgroundColor: isChristmas ? undefined : skin.bladeBg,
-                borderColor: skin.surfaceBorder,
+                borderColor: isChristmas ? 'rgba(253, 224, 140, 0.6)' : skin.surfaceBorder,
               }}
               aria-label={profile.musicEnabled ? 'Mute Soundtrack' : 'Enable Soundtrack'}
             >
@@ -296,17 +365,12 @@ export const TitleScreen: React.FC<TitleScreenProps> = React.memo(
 
               {/* Ornate Thematic Now Spinning Caption Plaque */}
               {isChristmas ? (
-                <div
-                  className="relative mt-4 sm:mt-6 w-[310px] sm:w-[372px] border px-5 py-3 text-center shadow-[0_14px_38px_rgba(0,0,0,0.8)]"
-                  style={{
-                    background:
-                      'linear-gradient(135deg, rgba(46, 12, 24, 0.94) 0%, rgba(20, 12, 26, 0.94) 55%, rgba(36, 10, 20, 0.94) 100%)',
-                    borderColor: 'rgba(253, 224, 140, 0.55)',
-                    clipPath: 'polygon(14px 0, 100% 0, calc(100% - 14px) 100%, 0 100%)',
-                  }}
-                >
-                  <SkinBladeTrim themeId={profile.theme} compact />
-                  <div className="flex items-center justify-center gap-2 text-[11px] font-bold text-[#fde68a]">
+                <div className="relative mt-5 sm:mt-7 w-[315px] sm:w-[388px]">
+                  {/* Top Pill Cap ("Now Spinning · BPM") anchored cleanly atop plaque */}
+                  <div
+                    className="relative z-30 mx-auto -mb-3 flex w-fit items-center gap-2 border border-[#fde68a]/65 bg-[#280b16] px-4 py-1 text-[11px] font-bold text-[#fde68a] shadow-[0_6px_16px_rgba(0,0,0,0.7)]"
+                    style={{ clipPath: 'polygon(10px 0, 100% 0, calc(100% - 10px) 100%, 0 100%)' }}
+                  >
                     <Disc3 className="h-3.5 w-3.5 text-[#fbbf24]" />
                     <span>Now Spinning</span>
                     <span aria-hidden="true">·</span>
@@ -318,24 +382,53 @@ export const TitleScreen: React.FC<TitleScreenProps> = React.memo(
                       </>
                     )}
                   </div>
-                  <h1
-                    className="font-display mt-1 truncate text-xl sm:text-2xl font-extrabold italic tracking-tight text-white"
+
+                  {/* Main Ornate Mahogany & Gold Frame */}
+                  <div
+                    className="relative border px-6 pt-5 pb-3.5 text-center shadow-[0_16px_42px_rgba(0,0,0,0.85)]"
                     style={{
-                      textShadow: '0 2px 16px rgba(251, 191, 36, 0.45)',
+                      background:
+                        'linear-gradient(135deg, rgba(52, 14, 26, 0.95) 0%, rgba(20, 10, 22, 0.96) 55%, rgba(38, 10, 20, 0.95) 100%)',
+                      borderColor: 'rgba(253, 224, 140, 0.65)',
+                      clipPath: 'polygon(16px 0, 100% 0, calc(100% - 16px) 100%, 0 100%)',
                     }}
                   >
-                    {activeSong.title}
-                  </h1>
-                  <div className="mt-0.5 flex items-center justify-center gap-2 text-xs text-[#fde68a]/85">
-                    <span className="h-[1px] w-6 bg-[#fde68a]/40" />
-                    <span className="truncate">{activeSong.artist} · {activeSong.genre}</span>
-                    <span className="h-[1px] w-6 bg-[#fde68a]/40" />
+                    <SkinBladeTrim themeId={profile.theme} compact />
+                    <h1
+                      className="font-display truncate text-xl sm:text-2xl font-extrabold italic tracking-tight text-[#fffbeb]"
+                      style={{
+                        textShadow: '0 2px 18px rgba(251, 191, 36, 0.55)',
+                      }}
+                    >
+                      {activeSong.title}
+                    </h1>
+                    <div className="mt-1 flex items-center justify-center gap-2.5 text-xs text-[#fde68a]/90">
+                      <span className="h-[1px] w-7 bg-gradient-to-r from-transparent to-[#fde68a]/75" />
+                      <span className="truncate font-medium">
+                        {activeSong.artist} · {activeSong.genre}
+                      </span>
+                      <span className="h-[1px] w-7 bg-gradient-to-l from-transparent to-[#fde68a]/75" />
+                    </div>
                   </div>
+
+                  {/* Holly + Sparkle Corners matching reference */}
                   <img
                     src={XMAS_SPRITES.hollySprig}
                     alt=""
                     aria-hidden="true"
-                    className="pointer-events-none absolute -right-3 -bottom-3 h-9 w-9 object-contain drop-shadow"
+                    className="pointer-events-none absolute -left-3.5 top-2 z-30 h-10 w-10 object-contain -rotate-[14deg] drop-shadow-[0_4px_10px_rgba(0,0,0,0.75)]"
+                  />
+                  <img
+                    src={XMAS_SPRITES.hollySprig}
+                    alt=""
+                    aria-hidden="true"
+                    className="pointer-events-none absolute -right-3 -bottom-3 z-30 h-10 w-10 object-contain rotate-[12deg] drop-shadow-[0_4px_10px_rgba(0,0,0,0.75)]"
+                  />
+                  <img
+                    src={XMAS_SPRITES.sparkleGold}
+                    alt=""
+                    aria-hidden="true"
+                    className="pointer-events-none absolute -right-1 top-3 z-30 h-6 w-6 object-contain drop-shadow-[0_0_10px_rgba(253,224,71,0.9)]"
                   />
                 </div>
               ) : (
@@ -390,7 +483,7 @@ export const TitleScreen: React.FC<TitleScreenProps> = React.memo(
               };
               const christmasBladeBg = item.primary
                 ? 'linear-gradient(125deg, #c81e3a 0%, #991b1b 52%, #4a0a18 100%)'
-                : 'linear-gradient(125deg, rgba(32, 13, 24, 0.92) 0%, rgba(15, 22, 38, 0.90) 100%)';
+                : 'linear-gradient(125deg, rgba(36, 12, 24, 0.93) 0%, rgba(15, 19, 36, 0.92) 100%)';
 
               return (
                 <StudioSlot
@@ -412,10 +505,10 @@ export const TitleScreen: React.FC<TitleScreenProps> = React.memo(
                       isChristmas
                         ? {
                             background: christmasBladeBg,
-                            borderColor: item.primary ? '#fde68a' : 'rgba(253, 224, 140, 0.5)',
+                            borderColor: item.primary ? '#fde68a' : 'rgba(253, 224, 140, 0.52)',
                             boxShadow: item.primary
-                              ? '0 12px 34px rgba(225, 29, 72, 0.38), inset 0 0 18px rgba(251, 191, 36, 0.2)'
-                              : '0 8px 24px rgba(0, 0, 0, 0.55)',
+                              ? '0 12px 34px rgba(225, 29, 72, 0.42), inset 0 0 18px rgba(251, 191, 36, 0.22)'
+                              : '0 8px 26px rgba(0, 0, 0, 0.62)',
                           }
                         : item.primary
                         ? undefined
@@ -425,14 +518,18 @@ export const TitleScreen: React.FC<TitleScreenProps> = React.memo(
                           }
                     }
                   >
-                    <SkinBladeTrim themeId={profile.theme} featured={item.primary} />
+                    <SkinBladeTrim
+                      themeId={profile.theme}
+                      featured={item.primary}
+                      accentVariant={item.accentVariant}
+                    />
                     <div className="lazer-unslant flex w-full items-center justify-between gap-4 min-w-0">
                       <div className="flex items-center gap-3.5 min-w-0">
                         {item.renderIcon()}
                         <div className="min-w-0">
                           <span
                             className={`font-display block truncate text-base sm:text-xl font-extrabold tracking-tight leading-tight ${
-                              isChristmas ? 'italic' : ''
+                              isChristmas ? 'italic text-[#fffbeb]' : ''
                             }`}
                           >
                             {item.label}
@@ -442,7 +539,7 @@ export const TitleScreen: React.FC<TitleScreenProps> = React.memo(
                               item.primary
                                 ? 'text-white/95 font-medium'
                                 : isChristmas
-                                ? 'text-[#fde68a]/75'
+                                ? 'text-[#fde68a]/78'
                                 : 'text-[#b6bfd1]'
                             }`}
                           >
@@ -457,7 +554,7 @@ export const TitleScreen: React.FC<TitleScreenProps> = React.memo(
                             src={XMAS_SPRITES.giftBox}
                             alt=""
                             aria-hidden="true"
-                            className="h-8 w-8 object-contain drop-shadow"
+                            className="h-8 w-8 object-contain drop-shadow-[0_3px_8px_rgba(0,0,0,0.7)]"
                           />
                         )}
                         <span
@@ -482,7 +579,7 @@ export const TitleScreen: React.FC<TitleScreenProps> = React.memo(
               <StudioSlot
                 widgetId="title_dev_studio_btn"
                 label="Axiom Dev Studio"
-                className="sm:ml-20"
+                className="sm:ml-16"
               >
                 <button
                   type="button"
@@ -498,7 +595,7 @@ export const TitleScreen: React.FC<TitleScreenProps> = React.memo(
                           Dev Studio
                         </span>
                         <span className="block truncate text-[11px] opacity-80">
-                          Game Engine View · Shaders, Beatmaps &amp; GitHub Push
+                          Game Engine View · Shaders, PNGs &amp; GitHub Push
                         </span>
                       </div>
                     </div>
@@ -518,10 +615,10 @@ export const TitleScreen: React.FC<TitleScreenProps> = React.memo(
         {/* Clean Footer Strip: Keybind Check + Theme Era Tag */}
         <footer
           className="relative z-20 flex w-full items-center justify-between gap-3 border-t pt-2 sm:pt-2.5 text-xs text-[#e2e8f0] shrink-0"
-          style={{ borderColor: skin.surfaceBorder }}
+          style={{ borderColor: isChristmas ? 'rgba(253, 224, 140, 0.4)' : skin.surfaceBorder }}
         >
           <div className="flex items-center gap-2 whitespace-nowrap">
-            <span>Triggers</span>
+            <span className={isChristmas ? 'text-[#fde68a]/85 font-semibold' : undefined}>Triggers</span>
             <span
               data-pressed={pressedKey === 'k1'}
               className={`tactile-btn inline-flex items-center border px-2 py-0.5 sm:px-2.5 sm:py-1 font-mono text-[11px] font-bold ${
@@ -532,7 +629,10 @@ export const TitleScreen: React.FC<TitleScreenProps> = React.memo(
               style={
                 pressedKey === 'k1'
                   ? undefined
-                  : { backgroundColor: skin.bladeBg, borderColor: skin.surfaceBorder }
+                  : {
+                      backgroundColor: isChristmas ? 'rgba(26, 10, 20, 0.92)' : skin.bladeBg,
+                      borderColor: isChristmas ? 'rgba(253, 224, 140, 0.5)' : skin.surfaceBorder,
+                    }
               }
             >
               {profile.trigger1Label}
@@ -547,7 +647,10 @@ export const TitleScreen: React.FC<TitleScreenProps> = React.memo(
               style={
                 pressedKey === 'k2'
                   ? undefined
-                  : { backgroundColor: skin.bladeBg, borderColor: skin.surfaceBorder }
+                  : {
+                      backgroundColor: isChristmas ? 'rgba(26, 10, 20, 0.92)' : skin.bladeBg,
+                      borderColor: isChristmas ? 'rgba(253, 224, 140, 0.5)' : skin.surfaceBorder,
+                    }
               }
             >
               {profile.trigger2Label}
@@ -557,14 +660,13 @@ export const TitleScreen: React.FC<TitleScreenProps> = React.memo(
             )}
           </div>
 
-          <div className="flex items-center gap-2.5 whitespace-nowrap text-[#fde68a]/90">
-            <span>{skin.isFullTransformation ? skin.name : '東京夜間音響'}</span>
-            <span aria-hidden="true">·</span>
-            <span>{skin.isFullTransformation ? skin.subtitle : '渋谷レコード'}</span>
+          <div className="flex items-center gap-2.5 whitespace-nowrap text-[#fde68a]">
+            <span aria-hidden="true" className="hidden sm:inline text-[#fde68a]/50">—</span>
+            <span>{skin.isFullTransformation ? skin.subtitle : '東京夜間音響 · 渋谷レコード'}</span>
+            <span aria-hidden="true" className="hidden sm:inline text-[#fde68a]/50">—</span>
           </div>
         </footer>
       </div>
     );
   },
 );
-

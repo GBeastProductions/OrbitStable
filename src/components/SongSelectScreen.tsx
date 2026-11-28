@@ -271,8 +271,12 @@ export const SongSelectScreen: React.FC<SongSelectScreenProps> = React.memo(
         <header
           className="relative flex h-[56px] sm:h-[60px] shrink-0 items-center justify-between gap-2 sm:gap-4 border-b px-3 sm:px-8"
           style={{
-            backgroundColor: skin.headerBg,
-            borderColor: skin.surfaceBorder,
+            background: isCozyXmas
+              ? 'linear-gradient(90deg, rgba(36, 12, 22, 0.94) 0%, rgba(20, 14, 28, 0.92) 50%, rgba(36, 12, 22, 0.94) 100%)'
+              : undefined,
+            backgroundColor: isCozyXmas ? undefined : skin.headerBg,
+            borderColor: isCozyXmas ? 'rgba(253, 230, 138, 0.48)' : skin.surfaceBorder,
+            boxShadow: isCozyXmas ? '0 4px 24px rgba(0,0,0,0.65)' : undefined,
           }}
         >
           <SkinBladeTrim themeId={profile.theme} />
@@ -385,9 +389,23 @@ export const SongSelectScreen: React.FC<SongSelectScreenProps> = React.memo(
             <div className="space-y-3.5 sm:space-y-4">
               <div
                 className="relative aspect-[16/8.5] w-full overflow-hidden border shadow-lg"
-                style={{ backgroundColor: skin.surfaceBg, borderColor: skin.surfaceBorder }}
+                style={{
+                  backgroundColor: skin.surfaceBg,
+                  borderColor: isCozyXmas ? 'rgba(253, 230, 138, 0.56)' : skin.surfaceBorder,
+                  boxShadow: isCozyXmas
+                    ? '0 10px 30px rgba(0,0,0,0.6), inset 0 0 22px rgba(251, 191, 36, 0.14)'
+                    : undefined,
+                }}
               >
-                <SkinBladeTrim themeId={profile.theme} featured />
+                <SkinBladeTrim themeId={profile.theme} featured accentVariant="bow_star" />
+                {isCozyXmas && (
+                  <img
+                    aria-hidden="true"
+                    src={XMAS_SPRITES.sparkleGold}
+                    alt=""
+                    className="pointer-events-none absolute left-3 top-3 z-20 h-6 w-6 object-contain drop-shadow-[0_0_8px_rgba(253,224,71,0.9)]"
+                  />
+                )}
                 {activeArtSrc ? (
                   <img
                     src={activeArtSrc}
@@ -1165,17 +1183,20 @@ export const SongSelectScreen: React.FC<SongSelectScreenProps> = React.memo(
         <footer
           className="relative z-20 flex h-[64px] sm:h-[68px] shrink-0 items-center justify-between gap-2 sm:gap-4 border-t px-3 sm:px-8 backdrop-blur-md"
           style={{
-            backgroundColor: skin.headerBg,
-            borderColor: skin.surfaceBorder,
+            background: isCozyXmas
+              ? 'linear-gradient(90deg, rgba(36, 12, 22, 0.94) 0%, rgba(20, 14, 28, 0.92) 50%, rgba(36, 12, 22, 0.94) 100%)'
+              : undefined,
+            backgroundColor: isCozyXmas ? undefined : skin.headerBg,
+            borderColor: isCozyXmas ? 'rgba(253, 230, 138, 0.48)' : skin.surfaceBorder,
           }}
         >
           <SkinBladeTrim themeId={profile.theme} compact />
           {isCozyXmas && (
             <img
               aria-hidden="true"
-              src={XMAS_SPRITES.giftBox}
+              src={XMAS_SPRITES.giftTrio}
               alt=""
-              className="pointer-events-none hidden lg:block absolute left-1/2 -top-6 h-10 w-10 -translate-x-1/2 object-contain drop-shadow-[0_4px_10px_rgba(0,0,0,0.75)]"
+              className="pointer-events-none hidden lg:block absolute left-1/2 -top-8 h-12 w-auto -translate-x-1/2 object-contain drop-shadow-[0_4px_12px_rgba(0,0,0,0.8)]"
             />
           )}
           <div className="flex items-center gap-2 sm:gap-3 shrink-0">

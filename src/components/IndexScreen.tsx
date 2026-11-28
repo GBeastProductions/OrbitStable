@@ -257,7 +257,13 @@ export const IndexScreen: React.FC<IndexScreenProps> = ({
       {/* Top 3-Zone Header */}
       <header
         className="relative z-20 flex shrink-0 flex-wrap items-center justify-between gap-x-4 gap-y-2.5 border-b px-4 py-2.5 sm:px-8 backdrop-blur-md"
-        style={{ backgroundColor: skin.headerBg, borderColor: skin.surfaceBorder }}
+        style={{
+          background: isCozyXmas
+            ? 'linear-gradient(90deg, rgba(36, 12, 22, 0.94) 0%, rgba(20, 14, 28, 0.92) 50%, rgba(36, 12, 22, 0.94) 100%)'
+            : undefined,
+          backgroundColor: isCozyXmas ? undefined : skin.headerBg,
+          borderColor: isCozyXmas ? 'rgba(253, 230, 138, 0.48)' : skin.surfaceBorder,
+        }}
       >
         <SkinBladeTrim themeId={profile.theme} />
         <div className="flex items-center gap-3 sm:gap-4 min-w-0">
@@ -273,6 +279,14 @@ export const IndexScreen: React.FC<IndexScreenProps> = ({
             </span>
           </button>
           <div className="flex items-baseline gap-2.5 min-w-0 truncate">
+            {isCozyXmas && (
+              <img
+                aria-hidden="true"
+                src={XMAS_SPRITES.hollyBells}
+                alt=""
+                className="hidden sm:block h-7 w-7 self-center object-contain drop-shadow"
+              />
+            )}
             <h1 className="font-display text-lg sm:text-2xl font-black tracking-tight text-white whitespace-nowrap">
               The Index
             </h1>
@@ -380,8 +394,23 @@ export const IndexScreen: React.FC<IndexScreenProps> = ({
               <div className="space-y-6">
                 <div className="flex flex-col items-center gap-6 border-b border-white/10 pb-6 sm:flex-row sm:items-start">
                   {/* Live Animated Diagram Canvas */}
-                  <div className="skin-surface-elevated relative flex flex-col items-center border p-3">
-                    <SkinBladeTrim themeId={profile.theme} featured={isCozyXmas} compact={!isCozyXmas} />
+                  <div
+                    className="skin-surface-elevated relative flex flex-col items-center border p-3"
+                    style={
+                      isCozyXmas
+                        ? {
+                            borderColor: 'rgba(253, 230, 138, 0.5)',
+                            boxShadow: 'inset 0 0 24px rgba(251, 191, 36, 0.14)',
+                          }
+                        : undefined
+                    }
+                  >
+                    <SkinBladeTrim
+                      themeId={profile.theme}
+                      featured={isCozyXmas}
+                      compact={!isCozyXmas}
+                      accentVariant={isCozyXmas ? 'bow_star' : 'minimal'}
+                    />
                     <MechanicDemoCanvas mode={selectedMode} />
                     <span className="mt-1 text-[10px] font-bold uppercase tracking-widest text-[#808ba1]">
                       Live Visual Preview

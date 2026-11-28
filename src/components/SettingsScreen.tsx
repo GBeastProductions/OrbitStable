@@ -177,8 +177,11 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
       <header
         className="relative z-20 flex h-[60px] shrink-0 items-center justify-between gap-4 border-b px-4 sm:px-8"
         style={{
-          backgroundColor: skin.headerBg,
-          borderColor: skin.surfaceBorder,
+          background: isCozyXmas
+            ? 'linear-gradient(90deg, rgba(36, 12, 22, 0.94) 0%, rgba(20, 14, 28, 0.92) 50%, rgba(36, 12, 22, 0.94) 100%)'
+            : undefined,
+          backgroundColor: isCozyXmas ? undefined : skin.headerBg,
+          borderColor: isCozyXmas ? 'rgba(253, 230, 138, 0.48)' : skin.surfaceBorder,
         }}
       >
         <SkinBladeTrim themeId={profile.theme} />

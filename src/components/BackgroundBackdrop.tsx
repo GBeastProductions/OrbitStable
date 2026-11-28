@@ -86,7 +86,7 @@ export const BackgroundBackdrop: React.FC<BackgroundBackdropProps> = React.memo(
           style={{
             background: isChristmas
               ? preferSkinBackdrop
-                ? 'radial-gradient(circle at 46% 36%, rgba(16, 12, 32, 0.14) 0%, rgba(14, 10, 26, 0.42) 55%, rgba(9, 7, 16, 0.82) 100%)'
+                ? 'radial-gradient(ellipse at 52% 32%, rgba(16, 12, 34, 0.16) 0%, rgba(14, 10, 28, 0.42) 56%, rgba(8, 6, 16, 0.78) 100%)'
                 : 'radial-gradient(circle at 50% 48%, rgba(8, 12, 22, 0.48) 0%, rgba(7, 8, 14, 0.86) 88%)'
               : skin.isFullTransformation
               ? 'radial-gradient(circle at 46% 42%, rgba(8,6,14,0.22) 0%, rgba(8,6,14,0.78) 90%)'
@@ -101,7 +101,7 @@ export const BackgroundBackdrop: React.FC<BackgroundBackdropProps> = React.memo(
             className="absolute inset-0"
             style={{
               background:
-                'radial-gradient(circle at 56% 24%, rgba(251, 191, 36, 0.16) 0%, rgba(244, 114, 182, 0.10) 24%, rgba(52, 211, 153, 0.08) 46%, transparent 72%)',
+                'radial-gradient(circle at 56% 24%, rgba(251, 191, 36, 0.20) 0%, rgba(244, 114, 182, 0.12) 26%, rgba(45, 212, 191, 0.12) 48%, transparent 74%)',
             }}
           />
         )}

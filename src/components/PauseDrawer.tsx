@@ -88,15 +88,31 @@ export const PauseDrawer: React.FC<PauseDrawerProps> = ({
         exit={{ x: '100%' }}
         transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
         onClick={(e) => e.stopPropagation()}
-        className="flex h-dvh w-[min(94vw,430px)] flex-col border-l border-[var(--accent-bright)]/50 backdrop-blur-md shadow-[-20px_0_60px_rgba(0,0,0,0.75)]"
-        style={{ backgroundColor: 'var(--skin-surface, rgba(11, 14, 22, 0.98))' }}
+        className="flex h-dvh w-[min(94vw,430px)] flex-col border-l backdrop-blur-md shadow-[-20px_0_60px_rgba(0,0,0,0.75)]"
+        style={{
+          backgroundColor: 'var(--skin-surface, rgba(11, 14, 22, 0.98))',
+          borderColor:
+            profile.theme === 'cozy_christmas_2026'
+              ? 'rgba(253, 230, 138, 0.55)'
+              : 'var(--accent-bright)',
+        }}
       >
         {/* Drawer Header */}
         <div
           className="relative flex items-center justify-between gap-3 border-b px-5 py-4"
           style={{
-            backgroundColor: 'var(--skin-header, #121624)',
-            borderColor: 'var(--skin-border, rgba(255,255,255,0.12))',
+            background:
+              profile.theme === 'cozy_christmas_2026'
+                ? 'linear-gradient(90deg, rgba(46, 14, 26, 0.96), rgba(20, 12, 24, 0.96))'
+                : undefined,
+            backgroundColor:
+              profile.theme === 'cozy_christmas_2026'
+                ? undefined
+                : 'var(--skin-header, #121624)',
+            borderColor:
+              profile.theme === 'cozy_christmas_2026'
+                ? 'rgba(253, 230, 138, 0.42)'
+                : 'var(--skin-border, rgba(255,255,255,0.12))',
           }}
         >
           <SkinBladeTrim themeId={profile.theme} compact />

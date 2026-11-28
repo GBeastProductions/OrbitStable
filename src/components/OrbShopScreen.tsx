@@ -124,7 +124,13 @@ export const OrbShopScreen: React.FC<OrbShopScreenProps> = ({
       {/* Top 3-Zone Header */}
       <header
         className="relative z-20 flex h-[60px] shrink-0 items-center justify-between gap-4 border-b px-4 sm:px-8 backdrop-blur-md"
-        style={{ backgroundColor: skin.headerBg, borderColor: skin.surfaceBorder }}
+        style={{
+          background: isCozyXmas
+            ? 'linear-gradient(90deg, rgba(36, 12, 22, 0.94) 0%, rgba(20, 14, 28, 0.92) 50%, rgba(36, 12, 22, 0.94) 100%)'
+            : undefined,
+          backgroundColor: isCozyXmas ? undefined : skin.headerBg,
+          borderColor: isCozyXmas ? 'rgba(253, 230, 138, 0.48)' : skin.surfaceBorder,
+        }}
       >
         <SkinBladeTrim themeId={profile.theme} />
         <div className="flex items-center gap-3 sm:gap-4 min-w-0">
@@ -140,6 +146,14 @@ export const OrbShopScreen: React.FC<OrbShopScreenProps> = ({
             </span>
           </button>
           <div className="flex items-baseline gap-2.5 min-w-0 truncate">
+            {isCozyXmas && (
+              <img
+                aria-hidden="true"
+                src={XMAS_SPRITES.hollySprig}
+                alt=""
+                className="hidden sm:block h-6 w-6 self-center object-contain drop-shadow"
+              />
+            )}
             <h1 className="font-display text-lg sm:text-2xl font-black tracking-tight text-white whitespace-nowrap">
               Orb Boutique
             </h1>
@@ -215,13 +229,13 @@ export const OrbShopScreen: React.FC<OrbShopScreenProps> = ({
               boxShadow: isCozyXmas ? '0 10px 36px rgba(190, 18, 60, 0.25)' : undefined,
             }}
           >
-            <SkinBladeTrim themeId={profile.theme} featured />
+            <SkinBladeTrim themeId={profile.theme} featured accentVariant="bow_star" />
             {isCozyXmas && (
               <img
                 aria-hidden="true"
-                src={XMAS_SPRITES.wreath}
+                src={XMAS_SPRITES.giftTrio}
                 alt=""
-                className="pointer-events-none hidden sm:block absolute bottom-3 right-3 h-14 w-14 object-contain opacity-85 drop-shadow-[0_4px_12px_rgba(0,0,0,0.75)] z-20"
+                className="pointer-events-none hidden sm:block absolute bottom-2 right-3 h-14 w-auto object-contain opacity-90 drop-shadow-[0_4px_12px_rgba(0,0,0,0.75)] z-20"
               />
             )}
             <div className="grid grid-cols-1 lg:grid-cols-12">

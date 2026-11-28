@@ -9,18 +9,24 @@ import {
   FolderKanban,
   Layers,
   LayoutGrid,
+  Lock,
   Monitor,
   Move,
   Music,
   Palette,
   PanelLeft,
+  Redo2,
   RotateCcw,
+  Trash2,
+  Undo2,
+  Unlock,
   Wrench,
   X,
   Zap,
 } from 'lucide-react';
 import { DEFAULT_DEV_DOCK_STYLE, WIDGET_CATALOG } from '../../store/studioRegistryStore';
 import {
+  CustomDecorWidget,
   DevAssetItem,
   EditableThemePayload,
   GameScreen,
@@ -59,6 +65,7 @@ interface AxiomDevStudioProps {
   assets: DevAssetItem[];
   editModeActive: boolean;
   selectedWidgetId: string | null;
+  selectedDecorId?: string | null;
   previewCharge: number | null;
   previewActive: boolean;
   draftSongsCount: number;
@@ -67,8 +74,13 @@ interface AxiomDevStudioProps {
   draftAssetsCount: number;
   exportSongs: SongDefinition[];
   exportThemes: EditableThemePayload[];
+  canUndo?: boolean;
+  canRedo?: boolean;
+  onUndo?: () => void;
+  onRedo?: () => void;
   onToggleEditMode: () => void;
   onSelectWidget: (widgetId: string) => void;
+  onSelectDecor?: (decorId: string | null) => void;
   onUpdateHudLayout: (next: PublishedHudLayout) => void;
   onSafeResetLayout: () => void;
   onSaveThemeDraft: (theme: EditableThemePayload) => void;
@@ -79,6 +91,7 @@ interface AxiomDevStudioProps {
   onPlaytestSong: (song: SongDefinition, startOffsetSec?: number) => void;
   onUpsertAsset: (asset: DevAssetItem) => void;
   onDeleteAsset: (assetId: string) => void;
+  onPlaceDecorFromAsset?: (asset: DevAssetItem) => void;
   onChangePreviewCharge: (val: number | null) => void;
   onTogglePreviewActive: (active: boolean) => void;
   onPublishAllCloud: () => Promise<string>;
@@ -93,9 +106,9 @@ const TOOL_TABS: {
   { id: 'themes', label: 'Themes', icon: Palette },
   { id: 'overdrive', label: 'Overdrive', icon: Flame },
   { id: 'songs', label: 'Songs', icon: Music },
-  { id: 'assets', label: 'Assets', icon: FolderKanban },
-  { id: 'layout', label: 'HUD Edit', icon: LayoutGrid },
-  { id: 'publish', label: 'Publish', icon: CloudUpload },
+  { id: 'assets', label: 'PNGs', icon: FolderKanban },
+  { id: 'layout', label: 'Layout', icon: LayoutGrid },
+  { id: 'publish', label: 'Push', icon: CloudUpload },
 ];
 
 const SCREEN_VIEWS: { id: GameScreen; label: string }[] = [
@@ -123,8 +136,13 @@ export const AxiomDevStudio: React.FC<AxiomDevStudioProps> = (props) => {
     assets,
     editModeActive,
     selectedWidgetId,
+    selectedDecorId,
     previewCharge,
     previewActive,
+    canUndo = false,
+    canRedo = false,
+    onUndo,
+    onRedo,
     onToggleEditMode,
     onSafeResetLayout,
   } = props;
@@ -154,35 +172,47 @@ export const AxiomDevStudio: React.FC<AxiomDevStudioProps> = (props) => {
     (props.hasDraftHud ? 1 : 0) +
     props.draftAssetsCount;
 
-  // Compact launcher chip when studio is collapsed
+  // No bottom-left floating DEV STUDIO launcher; launched strictly from Title / Settings buttons or F8
   if (!open) {
-    return (
-      <div className="fixed left-3 bottom-3 z-[70] flex items-center gap-1.5">
-        <button
-          type="button"
-          onClick={() => onToggleOpen(true)}
-          className="flex items-center gap-2 border border-white bg-black px-3 py-2 font-mono text-xs font-black text-white shadow-xl cursor-pointer transition-colors hover:bg-white hover:text-black"
-        >
-          <Wrench className="h-3.5 w-3.5" />
-          <span>DEV STUDIO</span>
-          {totalDrafts > 0 && (
-            <span className="bg-[#38BDF8] px-1.5 py-0.5 text-[10px] font-extrabold text-slate-950">
-              {totalDrafts}
-            </span>
-          )}
-        </button>
-        {editModeActive && (
-          <button
-            type="button"
-            onClick={onToggleEditMode}
-            className="border border-[#38BDF8] bg-[#38BDF8] px-2.5 py-2 font-mono text-xs font-bold text-slate-950 shadow-xl cursor-pointer"
-          >
-            EXIT EDIT
-          </button>
-        )}
-      </div>
-    );
+    return null;
   }
+
+  const placeAssetOnStage = (asset: DevAssetItem) => {
+    if (props.onPlaceDecorFromAsset) {
+      props.onPlaceDecorFromAsset(asset);
+      setShowInspector(true);
+      return;
+    }
+    const newId = `decor_${Date.now().toString().slice(-6)}`;
+    const nextItem: CustomDecorWidget = {
+      id: newId,
+      screen: currentScreen || 'ALL',
+      themeId: profile.theme,
+      zLayer: 'foreground',
+      kind: 'image',
+      imageUrl: asset.dataUrlOrPath,
+      text: asset.name,
+      xPct: 50,
+      yPct: 45,
+      widthPx: 180,
+      heightPx: 180,
+      scale: 1,
+      flipX: false,
+      locked: false,
+      opacity: 1,
+      rotationDeg: 0,
+      blendMode: 'normal',
+    };
+    props.onUpdateHudLayout({
+      ...hudLayout,
+      status: 'draft',
+      customDecorWidgets: [...(hudLayout.customDecorWidgets || []), nextItem],
+    });
+    props.onSelectDecor?.(newId);
+    onSelectTab('layout');
+    setShowInspector(true);
+    if (!editModeActive) onToggleEditMode();
+  };
 
   const assignAssetToOverdrive = (asset: DevAssetItem) => {
     const theme = themesMap[profile.theme] || Object.values(themesMap)[0];
@@ -245,6 +275,11 @@ export const AxiomDevStudio: React.FC<AxiomDevStudioProps> = (props) => {
   const visibleWidgets = WIDGET_CATALOG.filter(
     (w) => !currentScreen || w.screen === currentScreen || w.screen === 'GLOBAL',
   );
+  const stageDecorList = (hudLayout.customDecorWidgets || []).filter(
+    (d) =>
+      (!currentScreen || d.screen === 'ALL' || d.screen === currentScreen) &&
+      (!d.themeId || d.themeId === 'ALL' || d.themeId === profile.theme),
+  );
 
   const toggleWidgetVisible = (widgetId: string) => {
     const prev = hudLayout.widgets[widgetId] || {
@@ -263,6 +298,25 @@ export const AxiomDevStudio: React.FC<AxiomDevStudioProps> = (props) => {
         [widgetId]: { ...prev, visible: !prev.visible },
       },
     });
+  };
+
+  const toggleDecorLock = (decorId: string) => {
+    props.onUpdateHudLayout({
+      ...hudLayout,
+      status: 'draft',
+      customDecorWidgets: (hudLayout.customDecorWidgets || []).map((d) =>
+        d.id === decorId ? { ...d, locked: !d.locked } : d,
+      ),
+    });
+  };
+
+  const removeDecor = (decorId: string) => {
+    props.onUpdateHudLayout({
+      ...hudLayout,
+      status: 'draft',
+      customDecorWidgets: (hudLayout.customDecorWidgets || []).filter((d) => d.id !== decorId),
+    });
+    if (selectedDecorId === decorId) props.onSelectDecor?.(null);
   };
 
   const inspectorBody = (
@@ -311,6 +365,7 @@ export const AxiomDevStudio: React.FC<AxiomDevStudioProps> = (props) => {
           assets={assets}
           onUpsertAsset={props.onUpsertAsset}
           onDeleteAsset={props.onDeleteAsset}
+          onPlaceDecorFromAsset={placeAssetOnStage}
           onAssignToOverdrive={assignAssetToOverdrive}
           onAssignToThemeBackdrop={assignAssetToThemeBackdrop}
           onAssignToThemeOrnament={assignAssetToThemeOrnament}
@@ -322,9 +377,14 @@ export const AxiomDevStudio: React.FC<AxiomDevStudioProps> = (props) => {
           hudLayout={hudLayout}
           editModeActive={editModeActive}
           selectedWidgetId={selectedWidgetId}
+          selectedDecorId={selectedDecorId}
+          currentScreen={currentScreen}
+          activeThemeId={profile.theme}
+          themesMap={themesMap}
           assets={assets}
           onToggleEditMode={onToggleEditMode}
           onSelectWidget={props.onSelectWidget}
+          onSelectDecor={props.onSelectDecor}
           onUpdateLayout={props.onUpdateHudLayout}
           onSafeResetLayout={onSafeResetLayout}
         />
@@ -409,20 +469,44 @@ export const AxiomDevStudio: React.FC<AxiomDevStudioProps> = (props) => {
             backdropFilter: `blur(${dock.blurPx}px)`,
           }}
         >
-          <header className="flex items-center justify-between border-b border-slate-700 px-3.5 py-2.5">
-            <div className="flex items-center gap-2">
-              <Wrench className="h-4 w-4 text-[#38BDF8]" />
-              <h2 className="font-mono text-xs font-extrabold uppercase tracking-wider text-white">
+          <header className="flex items-center justify-between gap-2 border-b border-slate-700 px-3.5 py-2.5">
+            <div className="flex items-center gap-2 min-w-0">
+              <Wrench className="h-4 w-4 shrink-0 text-[#38BDF8]" />
+              <h2 className="truncate font-mono text-xs font-extrabold uppercase tracking-wider text-white">
                 ORBIT AXIOM STUDIO
               </h2>
             </div>
-            <button
-              type="button"
-              onClick={() => onToggleOpen(false)}
-              className="border border-slate-700 bg-slate-900 p-1 text-slate-300 hover:text-white cursor-pointer"
-            >
-              <X className="h-3.5 w-3.5" />
-            </button>
+            <div className="flex items-center gap-1 shrink-0">
+              {onUndo && (
+                <button
+                  type="button"
+                  disabled={!canUndo}
+                  onClick={onUndo}
+                  title="Undo (Ctrl+Z)"
+                  className="border border-slate-700 bg-slate-900 p-1 text-slate-300 hover:text-white disabled:opacity-35 cursor-pointer"
+                >
+                  <Undo2 className="h-3.5 w-3.5" />
+                </button>
+              )}
+              {onRedo && (
+                <button
+                  type="button"
+                  disabled={!canRedo}
+                  onClick={onRedo}
+                  title="Redo (Ctrl+Shift+Z)"
+                  className="border border-slate-700 bg-slate-900 p-1 text-slate-300 hover:text-white disabled:opacity-35 cursor-pointer"
+                >
+                  <Redo2 className="h-3.5 w-3.5" />
+                </button>
+              )}
+              <button
+                type="button"
+                onClick={() => onToggleOpen(false)}
+                className="border border-slate-700 bg-slate-900 p-1 text-slate-300 hover:text-white cursor-pointer"
+              >
+                <X className="h-3.5 w-3.5" />
+              </button>
+            </div>
           </header>
           {inspectorBody}
         </aside>
@@ -454,6 +538,30 @@ export const AxiomDevStudio: React.FC<AxiomDevStudioProps> = (props) => {
             <PanelLeft className="h-3 w-3" />
             <span>Hierarchy</span>
           </button>
+
+          {/* Undo / Redo History Controls */}
+          <div className="flex items-center gap-1 shrink-0">
+            <button
+              type="button"
+              disabled={!canUndo}
+              onClick={onUndo}
+              title="Undo Accidental Change (Ctrl+Z)"
+              className="flex items-center gap-1 border border-white/25 bg-black px-2 py-1 font-mono text-[10px] font-bold text-white hover:border-white disabled:opacity-35 disabled:cursor-not-allowed cursor-pointer"
+            >
+              <Undo2 className="h-3 w-3" />
+              <span className="hidden xl:inline">Undo</span>
+            </button>
+            <button
+              type="button"
+              disabled={!canRedo}
+              onClick={onRedo}
+              title="Redo Change (Ctrl+Shift+Z)"
+              className="flex items-center gap-1 border border-white/25 bg-black px-2 py-1 font-mono text-[10px] font-bold text-white hover:border-white disabled:opacity-35 disabled:cursor-not-allowed cursor-pointer"
+            >
+              <Redo2 className="h-3 w-3" />
+              <span className="hidden xl:inline">Redo</span>
+            </button>
+          </div>
 
           {/* Live Screen Switcher */}
           {onSwitchScreen && (
@@ -572,7 +680,7 @@ export const AxiomDevStudio: React.FC<AxiomDevStudioProps> = (props) => {
       {showHierarchy && (
         <aside
           aria-label="Scene Hierarchy"
-          className="orbit-scroll fixed left-0 top-11 bottom-0 z-[74] flex w-56 flex-col border-r border-white/20 bg-[#080a0f]/94 backdrop-blur-md"
+          className="orbit-scroll fixed left-0 top-11 bottom-0 z-[74] flex w-60 flex-col border-r border-white/20 bg-[#080a0f]/94 backdrop-blur-md"
         >
           <div className="flex items-center justify-between border-b border-white/15 px-3 py-2">
             <span className="flex items-center gap-1.5 font-mono text-[10px] font-black uppercase tracking-wider text-white">
@@ -582,7 +690,86 @@ export const AxiomDevStudio: React.FC<AxiomDevStudioProps> = (props) => {
           </div>
 
           <div className="orbit-scroll flex-1 overflow-y-auto p-2.5 space-y-3 text-xs">
+            {/* Placed Individual Stage PNGs */}
             <div className="space-y-1">
+              <div className="flex items-center justify-between px-1">
+                <span className="font-mono text-[9px] font-bold uppercase text-[#38BDF8]">
+                  Stage PNG Layers ({stageDecorList.length})
+                </span>
+                <button
+                  type="button"
+                  onClick={() => {
+                    onSelectTab('assets');
+                    setShowInspector(true);
+                  }}
+                  className="font-mono text-[9px] font-bold text-slate-300 hover:text-[#38BDF8] cursor-pointer"
+                >
+                  + Browse PNGs
+                </button>
+              </div>
+
+              {stageDecorList.length === 0 ? (
+                <p className="border border-dashed border-white/10 bg-black/40 px-2 py-2 text-[10px] text-slate-400">
+                  No custom PNGs placed on this screen. Open PNGs tab to place any sprite.
+                </p>
+              ) : (
+                stageDecorList.map((d) => {
+                  const isSel = selectedDecorId === d.id;
+                  return (
+                    <div
+                      key={d.id}
+                      className={`flex items-center justify-between gap-1 border px-2 py-1 ${
+                        isSel
+                          ? 'border-[#38BDF8] bg-[#38BDF8]/15 text-white'
+                          : 'border-white/10 bg-black/50 text-slate-300 hover:border-white/30'
+                      }`}
+                    >
+                      <button
+                        type="button"
+                        onClick={() => {
+                          props.onSelectDecor?.(d.id);
+                          onSelectTab('layout');
+                          setShowInspector(true);
+                          if (!editModeActive) onToggleEditMode();
+                        }}
+                        className="flex min-w-0 flex-1 items-center gap-1.5 text-left font-mono text-[10px] cursor-pointer"
+                      >
+                        {d.kind === 'image' && d.imageUrl && (
+                          <img
+                            src={d.imageUrl}
+                            alt=""
+                            className="h-4 w-4 shrink-0 object-contain"
+                          />
+                        )}
+                        <span className="truncate">{d.text || d.id}</span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => toggleDecorLock(d.id)}
+                        title={d.locked ? 'Unlock PNG' : 'Lock PNG'}
+                        className="text-slate-400 hover:text-amber-300 cursor-pointer"
+                      >
+                        {d.locked ? (
+                          <Lock className="h-3 w-3 text-amber-400" />
+                        ) : (
+                          <Unlock className="h-3 w-3" />
+                        )}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => removeDecor(d.id)}
+                        title="Remove PNG"
+                        className="text-rose-400 hover:text-rose-200 cursor-pointer"
+                      >
+                        <Trash2 className="h-3 w-3" />
+                      </button>
+                    </div>
+                  );
+                })
+              )}
+            </div>
+
+            <div className="space-y-1 border-t border-white/10 pt-2">
               <span className="block px-1 font-mono text-[9px] font-bold uppercase text-slate-400">
                 Active Screen Slots ({visibleWidgets.length})
               </span>
@@ -674,7 +861,7 @@ export const AxiomDevStudio: React.FC<AxiomDevStudioProps> = (props) => {
               <RotateCcw className="h-3 w-3" />
               <span>Safe Reset</span>
             </button>
-            <span className="font-mono text-[9px] text-slate-500">F8</span>
+            <span className="font-mono text-[9px] text-slate-500">Ctrl+Z · F8</span>
           </div>
         </aside>
       )}
@@ -683,7 +870,7 @@ export const AxiomDevStudio: React.FC<AxiomDevStudioProps> = (props) => {
       {showInspector && (
         <aside
           aria-label="Axiom Dev Inspector"
-          className="fixed right-0 top-11 bottom-0 z-[74] flex w-[min(92vw,370px)] flex-col border-l border-white/20 bg-[#080a0f]/95 shadow-2xl backdrop-blur-md"
+          className="fixed right-0 top-11 bottom-0 z-[74] flex w-[min(92vw,375px)] flex-col border-l border-white/20 bg-[#080a0f]/95 shadow-2xl backdrop-blur-md"
         >
           <div className="grid grid-cols-6 border-b border-white/15 bg-black/75">
             {TOOL_TABS.map((tab) => {

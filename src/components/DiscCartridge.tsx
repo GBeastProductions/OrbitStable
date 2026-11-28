@@ -67,7 +67,16 @@ export const DiscCartridge: React.FC<DiscCartridgeProps> = ({
           spinning ? 'animate-vinyl-cw' : ''
         }`}
         style={{
-          borderColor: skin.isFullTransformation ? skin.surfaceBorder : 'rgba(255,255,255,0.25)',
+          borderColor:
+            themeId === 'cozy_christmas_2026'
+              ? 'rgba(253, 230, 138, 0.78)'
+              : skin.isFullTransformation
+              ? skin.surfaceBorder
+              : 'rgba(255,255,255,0.25)',
+          boxShadow:
+            themeId === 'cozy_christmas_2026'
+              ? 'inset 0 0 0 2px rgba(253, 230, 138, 0.35), 0 12px 30px rgba(0,0,0,0.75)'
+              : undefined,
         }}
       >
         {/* Painted Golden Holiday Disc Rim overlay for Cozy Christmas */}
@@ -76,7 +85,7 @@ export const DiscCartridge: React.FC<DiscCartridgeProps> = ({
             src={XMAS_SPRITES.discGold}
             alt=""
             aria-hidden="true"
-            className="pointer-events-none absolute inset-0 h-full w-full object-cover opacity-90"
+            className="pointer-events-none absolute inset-0 h-full w-full object-cover opacity-95"
           />
         )}
 
@@ -102,7 +111,15 @@ export const DiscCartridge: React.FC<DiscCartridgeProps> = ({
         <div className="pointer-events-none absolute inset-[13.5%] rounded-full border border-white/5" />
 
         {/* Inner Track Artwork Label */}
-        <div className="absolute inset-[17%] overflow-hidden rounded-full border border-white/30 bg-[#0e111a]">
+        <div
+          className="absolute inset-[17%] overflow-hidden rounded-full border bg-[#0e111a]"
+          style={{
+            borderColor:
+              themeId === 'cozy_christmas_2026'
+                ? 'rgba(253, 230, 138, 0.55)'
+                : 'rgba(255,255,255,0.3)',
+          }}
+        >
           {imageUrl ? (
             <img
               src={imageUrl}
@@ -133,7 +150,16 @@ export const DiscCartridge: React.FC<DiscCartridgeProps> = ({
           isHero ? 'h-[25%] w-[25%]' : 'h-[31%] w-[31%]'
         }`}
         style={{
-          borderColor: skin.isFullTransformation ? skin.surfaceBorder : 'rgba(255,255,255,0.3)',
+          borderColor:
+            themeId === 'cozy_christmas_2026'
+              ? '#fde68a'
+              : skin.isFullTransformation
+              ? skin.surfaceBorder
+              : 'rgba(255,255,255,0.3)',
+          boxShadow:
+            themeId === 'cozy_christmas_2026'
+              ? '0 0 14px rgba(251, 191, 36, 0.35), inset 0 0 8px rgba(225, 29, 72, 0.25)'
+              : undefined,
         }}
       >
         <div className="flex flex-col items-center justify-center text-center">

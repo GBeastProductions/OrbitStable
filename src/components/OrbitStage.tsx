@@ -1774,12 +1774,20 @@ export const OrbitStage: React.FC<OrbitStageProps> = ({
               }}
             >
               {isCozyXmas && (
-                <img
-                  aria-hidden="true"
-                  src={XMAS_SPRITES.hollySprig}
-                  alt=""
-                  className="pointer-events-none absolute -left-2 -top-2 h-6 w-6 object-contain drop-shadow"
-                />
+                <>
+                  <img
+                    aria-hidden="true"
+                    src={XMAS_SPRITES.hollySprig}
+                    alt=""
+                    className="pointer-events-none absolute -left-2 -top-2 h-6 w-6 object-contain drop-shadow"
+                  />
+                  <img
+                    aria-hidden="true"
+                    src={XMAS_SPRITES.snowflakeIce}
+                    alt=""
+                    className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 h-8 w-8 object-contain opacity-25 mix-blend-screen"
+                  />
+                </>
               )}
               <div className="flex items-center gap-1.5 text-[10px] leading-tight text-[#d1d5db] whitespace-nowrap">
                 <span>

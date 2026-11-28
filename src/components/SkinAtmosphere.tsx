@@ -106,11 +106,11 @@ function initParticles(preset: SkinParticlePreset, w: number, h: number): Partic
 const CozyChristmasScenicLayers: React.FC<{ dimDuringPlay: boolean }> = ({ dimDuringPlay }) => {
   return (
     <>
-      {/* FAR SKY LAYER: Full Harvest/Winter Moon + Santa's Sleigh Silhouette crossing the Aurora */}
+      {/* FAR SKY LAYER: Full Winter Moon + Santa's Sleigh Silhouette + Floating Citadel & Aurora Peaks */}
       <div
         aria-hidden="true"
         className="pointer-events-none fixed inset-0 z-[2] overflow-hidden transition-opacity duration-300"
-        style={{ opacity: dimDuringPlay ? 0.32 : 0.88 }}
+        style={{ opacity: dimDuringPlay ? 0.28 : 0.92 }}
       >
         <svg
           viewBox="0 0 1600 900"
@@ -119,63 +119,91 @@ const CozyChristmasScenicLayers: React.FC<{ dimDuringPlay: boolean }> = ({ dimDu
         >
           <defs>
             <radialGradient id="xmasMoonGlow" cx="50%" cy="50%" r="50%">
-              <stop offset="0%" stopColor="#fffbeb" stopOpacity="0.95" />
+              <stop offset="0%" stopColor="#fffbeb" stopOpacity="0.96" />
               <stop offset="48%" stopColor="#fde68a" stopOpacity="0.82" />
               <stop offset="72%" stopColor="#fbcfe8" stopOpacity="0.28" />
               <stop offset="100%" stopColor="#fbcfe8" stopOpacity="0" />
             </radialGradient>
             <linearGradient id="sleighTrail" x1="0%" y1="0%" x2="100%" y2="0%">
               <stop offset="0%" stopColor="#fde68a" stopOpacity="0" />
-              <stop offset="65%" stopColor="#fde68a" stopOpacity="0.45" />
-              <stop offset="100%" stopColor="#ffffff" stopOpacity="0.9" />
+              <stop offset="65%" stopColor="#fde68a" stopOpacity="0.52" />
+              <stop offset="100%" stopColor="#ffffff" stopOpacity="0.95" />
+            </linearGradient>
+            <linearGradient id="xmasFloorGlow" x1="0%" y1="0%" x2="0%" y2="100%">
+              <stop offset="0%" stopColor="#1e1b4b" stopOpacity="0" />
+              <stop offset="42%" stopColor="#312e81" stopOpacity="0.34" />
+              <stop offset="100%" stopColor="#090714" stopOpacity="0.94" />
             </linearGradient>
           </defs>
+
           {/* Glowing Lunar Halo */}
-          <circle cx="940" cy="235" r="145" fill="url(#xmasMoonGlow)" />
-          <circle cx="940" cy="235" r="64" fill="#fff7ed" opacity="0.94" />
+          <circle cx="945" cy="235" r="155" fill="url(#xmasMoonGlow)" />
+          <circle cx="945" cy="235" r="66" fill="#fff7ed" opacity="0.95" />
+
           {/* Stardust trail across the moon */}
           <path
-            d="M660 285 Q 815 268, 935 225"
+            d="M620 296 Q 800 272, 938 224"
             fill="none"
             stroke="url(#sleighTrail)"
-            strokeWidth="2.5"
+            strokeWidth="2.4"
             strokeDasharray="6 7"
           />
+
           {/* Crisp Silhouette: Santa's Sleigh + Reindeer Team against the moon */}
-          <g transform="translate(888 185) rotate(-14) scale(0.78)" fill="#170b18" opacity="0.92">
-            {/* Sleigh */}
+          <g transform="translate(892 184) rotate(-14) scale(0.8)" fill="#170b18" opacity="0.94">
             <path d="M0 32 L32 32 L40 20 L34 20 L29 27 L10 27 L4 16 L-4 22 Z" />
             <path d="M-2 36 Q 18 40, 38 35" stroke="#170b18" strokeWidth="2.5" fill="none" />
             <circle cx="15" cy="18" r="5" />
-            {/* Reins */}
             <path d="M36 24 L118 14" stroke="#170b18" strokeWidth="1.2" fill="none" />
-            {/* Reindeer 1 */}
             <path d="M58 26 L62 18 L74 18 L78 11 L82 14 L77 21 L76 30 L72 30 L72 24 L64 24 L62 30 L58 30 Z" />
-            {/* Reindeer 2 */}
             <path d="M94 21 L98 13 L110 13 L115 6 L119 9 L114 16 L113 25 L109 25 L109 19 L101 19 L99 25 L95 25 Z" />
           </g>
+
+          {/* Distant Floating Winter Citadel Silhouette (matches concept art horizon depth) */}
+          {!dimDuringPlay && (
+            <g transform="translate(690 420)" opacity="0.65">
+              <polygon points="-95,18 95,18 68,68 18,96 -42,72" fill="#1e1b3a" />
+              <rect x="-56" y="-12" width="18" height="30" fill="#231f42" />
+              <polygon points="-58,-12 -47,-32 -36,-12" fill="#2d2654" />
+              <rect x="-24" y="-34" width="24" height="52" fill="#262148" />
+              <polygon points="-28,-34 -12,-66 4,-34" fill="#322a5e" />
+              <rect x="12" y="-18" width="20" height="36" fill="#231f42" />
+              <polygon points="10,-18 22,-42 34,-18" fill="#2d2654" />
+              <rect x="-15" y="-12" width="4" height="7" fill="#fde68a" opacity="0.85" />
+              <rect x="-50" y="-2" width="3" height="5" fill="#fde68a" opacity="0.7" />
+              <rect x="20" y="-6" width="3" height="5" fill="#fde68a" opacity="0.7" />
+            </g>
+          )}
+
+          {/* Icy Reflective Courtyard Floor & Subtle Golden Center Ring Reflection */}
+          <rect x="0" y="655" width="1600" height="245" fill="url(#xmasFloorGlow)" />
+          {!dimDuringPlay && (
+            <g opacity="0.58">
+              <ellipse cx="775" cy="790" rx="220" ry="52" fill="rgba(15, 23, 42, 0.72)" stroke="rgba(253, 230, 138, 0.35)" strokeWidth="2" />
+              <ellipse cx="775" cy="790" rx="165" ry="38" fill="none" stroke="rgba(186, 230, 253, 0.25)" strokeWidth="1.5" />
+              <ellipse cx="775" cy="790" rx="108" ry="23" fill="rgba(251, 191, 36, 0.08)" stroke="rgba(251, 191, 36, 0.28)" strokeWidth="1" />
+            </g>
+          )}
         </svg>
       </div>
 
-      {/* MIDGROUND DIORAMA PROPS: Bottom Snowdrifts + Glowing Brass Lanterns + Snowy Pines on Wide Stage */}
+      {/* MIDGROUND DIORAMA PROPS: Bottom Snowdrifts + Stage Flanks */}
       <div
         aria-hidden="true"
         className="pointer-events-none fixed inset-x-0 bottom-0 z-[6] overflow-hidden transition-opacity duration-300"
-        style={{ opacity: dimDuringPlay ? 0.36 : 0.94 }}
+        style={{ opacity: dimDuringPlay ? 0.38 : 0.96 }}
       >
-        {/* Left & Right Snowy Ground Banks anchoring the viewport */}
         <img
           src={XMAS_SPRITES.snowdriftBank}
           alt=""
-          className="absolute -bottom-2 -left-10 w-[44vw] max-w-[540px] object-contain opacity-85 drop-shadow-[0_-4px_16px_rgba(186,230,253,0.22)]"
+          className="absolute -bottom-3 -left-10 w-[44vw] max-w-[560px] object-contain opacity-90 drop-shadow-[0_-4px_16px_rgba(186,230,253,0.22)]"
         />
         <img
           src={XMAS_SPRITES.snowdriftBank}
           alt=""
-          className="absolute -bottom-2 -right-10 w-[44vw] max-w-[540px] -scale-x-100 object-contain opacity-85 drop-shadow-[0_-4px_16px_rgba(186,230,253,0.22)]"
+          className="absolute -bottom-3 -right-10 w-[44vw] max-w-[560px] -scale-x-100 object-contain opacity-90 drop-shadow-[0_-4px_16px_rgba(186,230,253,0.22)]"
         />
 
-        {/* During gameplay, flank outer edges gently with glowing Christmas lanterns & snow-capped pine silhouettes */}
         {dimDuringPlay && (
           <>
             <img
@@ -439,6 +467,14 @@ export const SkinBladeTrim: React.FC<{
   themeId: ThemeId;
   featured?: boolean;
   compact?: boolean;
-}> = ({ themeId, featured = false, compact = false }) => {
-  return <ThemeBladeAccents themeId={themeId} featured={featured} compact={compact} />;
+  accentVariant?: 'holly_star' | 'bow_star' | 'minimal';
+}> = ({ themeId, featured = false, compact = false, accentVariant = 'minimal' }) => {
+  return (
+    <ThemeBladeAccents
+      themeId={themeId}
+      featured={featured}
+      compact={compact}
+      accentVariant={accentVariant}
+    />
+  );
 };

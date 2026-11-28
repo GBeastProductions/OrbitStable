@@ -6,7 +6,7 @@ import { useStudioLayout } from './LiveLayoutWrapper';
 
 /**
  * Bespoke ORBIT crest logo dynamically styled per Transformation Theme,
- * faithful to the ConseptsFT art direction.
+ * faithful to the concept art direction.
  */
 export const ThemeTitleLogo: React.FC<{
   themeId: ThemeId;
@@ -15,10 +15,18 @@ export const ThemeTitleLogo: React.FC<{
   if (themeId === 'cozy_christmas_2026') {
     return (
       <div className="relative flex items-center select-none">
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute -inset-x-4 -inset-y-2 rounded-full opacity-45 blur-xl"
+          style={{
+            background:
+              'radial-gradient(ellipse at center, rgba(251,191,36,0.45) 0%, rgba(225,29,72,0.22) 55%, transparent 78%)',
+          }}
+        />
         <img
-          src={XMAS_SPRITES.logoOrnate}
+          src={XMAS_SPRITES.logoSanta}
           alt="ORBIT Cozy Christmas 2026"
-          className="h-14 sm:h-16 w-auto object-contain drop-shadow-[0_4px_18px_rgba(251,191,36,0.45)]"
+          className="relative z-10 h-14 sm:h-[68px] w-auto object-contain drop-shadow-[0_4px_18px_rgba(251,191,36,0.52)]"
         />
       </div>
     );
@@ -43,13 +51,11 @@ export const ThemeTitleLogo: React.FC<{
             />
             <path d="M50 22 L46 8 L58 18 Z" fill="#991b1b" />
             <path d="M188 22 L196 8 L198 24 Z" fill="#991b1b" />
-            {/* Crimson 4-point star glint inside O */}
             <path
               d="M32 24 L35 39 L50 42 L35 45 L32 60 L29 45 L14 42 L29 39 Z"
               fill="#ef4444"
               opacity="0.9"
             />
-            {/* Hanging brass Krampus bell */}
             <line x1="212" y1="42" x2="212" y2="62" stroke="#b45309" strokeWidth="1.8" />
             <path
               d="M203 78 L221 78 L217 65 C216 61 208 61 207 65 Z"
@@ -101,7 +107,6 @@ export const ThemeTitleLogo: React.FC<{
               stroke="url(#sakuraRing)"
               strokeWidth="2.6"
             />
-            {/* Glowing 5-petal sakura bloom at top-right arc */}
             <g transform="translate(206 20)">
               {[0, 72, 144, 216, 288].map((deg) => (
                 <ellipse
@@ -141,7 +146,6 @@ export const ThemeTitleLogo: React.FC<{
     );
   }
 
-  // Classic orbital arcade mark
   return (
     <div className="relative flex items-center gap-3 select-none">
       <div className="relative">
@@ -170,70 +174,120 @@ export const ThemeBladeAccents: React.FC<{
   themeId: ThemeId;
   featured?: boolean;
   compact?: boolean;
-}> = ({ themeId, featured = false, compact = false }) => {
+  accentVariant?: 'holly_star' | 'bow_star' | 'minimal';
+}> = ({ themeId, featured = false, compact = false, accentVariant = 'minimal' }) => {
   const { themesMap } = useStudioLayout();
   const skin = getResolvedSkinPack(themeId, themesMap);
   if (skin.trimStyle === 'none') return null;
 
   if (skin.trimStyle === 'snow_cap') {
+    const showCornerHolly = !compact && (featured || accentVariant === 'holly_star');
+    const showRightBowAndStar = featured || accentVariant === 'bow_star';
+
     return (
       <>
-        {/* Sculpted frosted snowdrift blanket along top bezel + warm gold bevel trim */}
+        {/* Sculpted Softly-Shaded Pillowy Snow Cap along upper rim */}
         <svg
           aria-hidden="true"
-          viewBox="0 0 400 28"
+          viewBox="0 0 420 30"
           preserveAspectRatio="none"
-          className="pointer-events-none absolute -top-[4px] inset-x-0 h-[18px] w-full z-20 drop-shadow-[0_3px_5px_rgba(14,116,144,0.35)]"
+          className="pointer-events-none absolute -top-[4px] inset-x-0 h-[16px] sm:h-[19px] w-full z-20 drop-shadow-[0_3px_5px_rgba(14,116,144,0.34)]"
         >
           <defs>
             <linearGradient id="xmasSnowBody" x1="0" y1="0" x2="0" y2="1">
               <stop offset="0%" stopColor="#ffffff" />
-              <stop offset="68%" stopColor="#f1f5f9" />
+              <stop offset="56%" stopColor="#eef6ff" />
               <stop offset="100%" stopColor="#bae6fd" />
             </linearGradient>
           </defs>
           <path
-            d="M0 0 L400 0 L400 10 C382 19, 362 7, 336 15 C312 22, 286 6, 256 13 C228 21, 198 8, 168 15 C140 23, 112 7, 82 14 C54 22, 26 8, 0 13 Z"
+            d="M0 0 L420 0 L420 9 C404 16, 386 6, 362 12 C340 18, 314 5, 286 11 C260 17, 232 4, 204 10 C176 16, 148 5, 118 12 C90 18, 60 6, 34 14 C18 18, 8 10, 0 11 Z"
             fill="url(#xmasSnowBody)"
           />
           <path
-            d="M0 13 C26 8, 54 22, 82 14 C112 7, 140 23, 168 15 C198 8, 228 21, 256 13 C286 6, 312 22, 336 15 C362 7, 382 19, 400 10"
+            d="M0 11 C8 10, 18 18, 34 14 C60 6, 90 18, 118 12 C148 5, 176 16, 204 10 C232 4, 260 17, 286 11 C314 5, 340 18, 362 12 C386 6, 404 16, 420 9"
             fill="none"
             stroke="#7dd3fc"
             strokeWidth="1.2"
-            opacity="0.7"
+            opacity="0.72"
+          />
+          <path
+            d="M24 4 Q 90 2, 165 4 M 235 4 Q 315 2, 392 4"
+            fill="none"
+            stroke="#ffffff"
+            strokeWidth="1.8"
+            strokeLinecap="round"
+            opacity="0.95"
           />
         </svg>
 
-        {/* Subtle warm champagne-gold inner border sheen */}
+        {/* Warm Champagne-Gold Inner Bevel Rim + Corner Sparkle Pinpoints */}
         <span
           aria-hidden="true"
-          className="pointer-events-none absolute inset-0 z-10 border border-[#fde68a]/35 shadow-[inset_0_0_14px_rgba(251,191,36,0.12)]"
+          className="pointer-events-none absolute inset-[1px] z-10 border border-[#fde68a]/40 shadow-[inset_0_0_16px_rgba(251,191,36,0.12)]"
         />
 
-        {/* Painted Holly Sprig Corner Cluster */}
         {!compact && (
+          <img
+            aria-hidden="true"
+            src={XMAS_SPRITES.snowflakeIce}
+            alt=""
+            className="pointer-events-none absolute right-11 top-1/2 -translate-y-1/2 h-9 w-9 object-contain opacity-[0.22] z-10 mix-blend-screen"
+          />
+        )}
+
+        {/* Painted Holly Sprig Corner Cluster */}
+        {showCornerHolly && (
           <img
             aria-hidden="true"
             src={XMAS_SPRITES.hollySprig}
             alt=""
-            className="pointer-events-none absolute -left-3 -top-3.5 h-8 w-8 object-contain z-30 drop-shadow-[0_3px_6px_rgba(0,0,0,0.65)]"
+            className={`pointer-events-none absolute z-30 h-8 w-8 object-contain drop-shadow-[0_3px_6px_rgba(0,0,0,0.7)] ${
+              featured ? '-left-3 -top-3.5' : '-right-2.5 -top-3'
+            }`}
           />
         )}
 
-        {/* Featured Right-Corner Painted Crimson Velvet Bow + Hanging Gold Star */}
-        {featured && (
-          <div aria-hidden="true" className="pointer-events-none absolute -right-2 -top-3.5 z-30 flex flex-col items-center">
+        {/* Featured / Selected Crimson Velvet Bow + Glowing Hanging Gold Star */}
+        {showRightBowAndStar && (
+          <div
+            aria-hidden="true"
+            className="pointer-events-none absolute -right-2.5 -top-3.5 z-30 flex flex-col items-center"
+          >
             <img
               src={XMAS_SPRITES.bowCrimson}
               alt=""
-              className="h-9 w-9 object-contain drop-shadow-[0_3px_8px_rgba(225,29,72,0.55)]"
+              className="h-9 w-9 object-contain drop-shadow-[0_4px_10px_rgba(225,29,72,0.65)]"
             />
-            <svg viewBox="0 0 24 28" className="-mt-2 h-6 w-5 overflow-visible drop-shadow-[0_0_8px_rgba(253,224,71,0.95)]">
+            <svg
+              viewBox="0 0 24 28"
+              className="-mt-2 h-6 w-5 overflow-visible drop-shadow-[0_0_9px_rgba(253,224,71,0.95)]"
+            >
               <line x1="12" y1="0" x2="12" y2="10" stroke="#fde68a" strokeWidth="1.5" />
-              <path d="M12 8 L14.5 14 L21 14.8 L16 18.8 L17.4 25 L12 21.8 L6.6 25 L8 18.8 L3 14.8 L9.5 14 Z" fill="#fde047" stroke="#fffbeb" strokeWidth="0.7" />
+              <path
+                d="M12 8 L14.5 14 L21 14.8 L16 18.8 L17.4 25 L12 21.8 L6.6 25 L8 18.8 L3 14.8 L9.5 14 Z"
+                fill="#fde047"
+                stroke="#fffbeb"
+                strokeWidth="0.7"
+              />
             </svg>
           </div>
+        )}
+
+        {accentVariant === 'holly_star' && !featured && (
+          <svg
+            aria-hidden="true"
+            viewBox="0 0 24 28"
+            className="pointer-events-none absolute right-0.5 -bottom-4 z-30 h-5 w-4 overflow-visible drop-shadow-[0_0_8px_rgba(253,224,71,0.9)]"
+          >
+            <line x1="12" y1="0" x2="12" y2="9" stroke="#fde68a" strokeWidth="1.3" />
+            <path
+              d="M12 7 L14.3 12.8 L20.5 13.5 L15.8 17.5 L17 23.5 L12 20.4 L7 23.5 L8.2 17.5 L3.5 13.5 L9.7 12.8 Z"
+              fill="#fde047"
+              stroke="#fffbeb"
+              strokeWidth="0.6"
+            />
+          </svg>
         )}
       </>
     );
@@ -242,7 +296,6 @@ export const ThemeBladeAccents: React.FC<{
   if (skin.trimStyle === 'krampus_iron') {
     return (
       <>
-        {/* Forged dark iron spiked trim + crimson glow line */}
         <svg
           aria-hidden="true"
           viewBox="0 0 400 18"
@@ -271,7 +324,6 @@ export const ThemeBladeAccents: React.FC<{
     );
   }
 
-  // sakura_blossom: gold kintsugi line + crisp blooming 5-petal blossoms
   return (
     <>
       <span
@@ -310,27 +362,37 @@ export const ThemeBladeAccents: React.FC<{
 };
 
 /**
- * Spinning Disc / Platter themed bezel & ornaments matching the concept art.
+ * Spinning Disc / Platter themed bezel & ornaments matching Cozy_Christmas_Orbit_Game_Menu_ba586305.png.
  */
 export const ThemeDiscBezel: React.FC<{ themeId: ThemeId }> = ({ themeId }) => {
   if (themeId === 'cozy_christmas_2026') {
     return (
       <div aria-hidden="true" className="pointer-events-none absolute -inset-6 z-20">
-        {/* Soft snow drift crown arcing neatly across top platter */}
+        {/* Soft snow drift crown arcing neatly across top platter + hanging glowing 5-point gold star */}
         <svg viewBox="0 0 260 260" className="h-full w-full overflow-visible">
           <defs>
             <linearGradient id="xmasDiscSnow" x1="0" y1="0" x2="0" y2="1">
               <stop offset="0%" stopColor="#ffffff" />
+              <stop offset="65%" stopColor="#f1f5f9" />
               <stop offset="100%" stopColor="#bae6fd" />
             </linearGradient>
           </defs>
           <path
-            d="M44 68 C 82 22, 162 20, 212 60 C 190 66, 168 48, 142 56 C 114 64, 90 46, 62 66 Z"
+            d="M42 70 C 78 22, 168 18, 214 62 C 194 67, 174 47, 146 56 C 118 65, 92 46, 62 67 Z"
             fill="url(#xmasDiscSnow)"
-            opacity="0.96"
+            opacity="0.97"
           />
-          {/* Hanging gold star beneath right ribbon */}
-          <line x1="205" y1="74" x2="205" y2="112" stroke="#fde68a" strokeWidth="1.6" opacity="0.85" />
+          <path
+            d="M58 58 Q 126 24, 196 54"
+            fill="none"
+            stroke="#ffffff"
+            strokeWidth="2"
+            strokeLinecap="round"
+            opacity="0.9"
+          />
+          {/* Fine golden hanging string + luminous 5-point star dangling beneath right crimson bow */}
+          <line x1="205" y1="74" x2="205" y2="112" stroke="#fde68a" strokeWidth="1.6" opacity="0.9" />
+          <circle cx="205" cy="126" r="14" fill="rgba(253, 224, 71, 0.28)" />
           <path
             d="M205 108 L210 119 L222 121 L213 128 L215 140 L205 134 L195 140 L197 128 L188 121 L200 119 Z"
             fill="#fde047"
@@ -338,17 +400,31 @@ export const ThemeDiscBezel: React.FC<{ themeId: ThemeId }> = ({ themeId }) => {
             strokeWidth="1"
           />
         </svg>
+
         {/* Painted Crimson Velvet Ribbon Bow perched on upper-right rim */}
         <img
           src={XMAS_SPRITES.bowCrimson}
           alt=""
           className="absolute -right-2 top-3 h-20 w-20 sm:h-24 sm:w-24 object-contain rotate-[14deg] drop-shadow-[0_6px_14px_rgba(0,0,0,0.75)]"
         />
+
         {/* Painted Holly Sprig nestled along upper-left rim */}
         <img
           src={XMAS_SPRITES.hollySprig}
           alt=""
           className="absolute left-1 top-3 h-12 w-12 sm:h-14 sm:w-14 object-contain -rotate-[18deg] drop-shadow-[0_4px_10px_rgba(0,0,0,0.7)]"
+        />
+
+        {/* Crisp Golden Sparkle Star Glints around the outer bezel */}
+        <img
+          src={XMAS_SPRITES.sparkleGold}
+          alt=""
+          className="absolute -left-3 top-[38%] h-7 w-7 object-contain opacity-95 drop-shadow-[0_0_10px_rgba(253,224,71,0.9)]"
+        />
+        <img
+          src={XMAS_SPRITES.sparkleGold}
+          alt=""
+          className="absolute right-4 bottom-6 h-6 w-6 object-contain opacity-90 drop-shadow-[0_0_8px_rgba(253,224,71,0.85)]"
         />
       </div>
     );
@@ -358,7 +434,6 @@ export const ThemeDiscBezel: React.FC<{ themeId: ThemeId }> = ({ themeId }) => {
     return (
       <div aria-hidden="true" className="pointer-events-none absolute -inset-7 z-20">
         <svg viewBox="0 0 280 280" className="h-full w-full overflow-visible">
-          {/* Forged iron spiked halo & chain arcs */}
           <circle
             cx="140"
             cy="140"
@@ -374,7 +449,6 @@ export const ThemeDiscBezel: React.FC<{ themeId: ThemeId }> = ({ themeId }) => {
               <path d="M140 2 L146 18 L140 26 L134 18 Z" fill="#ef4444" stroke="#fca5a5" strokeWidth="0.7" />
             </g>
           ))}
-          {/* Glowing crimson candles flanking bottom-left & bottom-right */}
           <g transform="translate(26 205)">
             <rect x="0" y="16" width="12" height="32" rx="2" fill="#991b1b" />
             <ellipse cx="6" cy="10" rx="3.5" ry="6" fill="#fbbf24" />
@@ -394,7 +468,6 @@ export const ThemeDiscBezel: React.FC<{ themeId: ThemeId }> = ({ themeId }) => {
     return (
       <div aria-hidden="true" className="pointer-events-none absolute -inset-6 z-20">
         <svg viewBox="0 0 260 260" className="h-full w-full overflow-visible">
-          {/* Dual gold & magenta kintsugi halo */}
           <circle
             cx="130"
             cy="130"
@@ -404,7 +477,6 @@ export const ThemeDiscBezel: React.FC<{ themeId: ThemeId }> = ({ themeId }) => {
             strokeWidth="2.4"
             opacity="0.9"
           />
-          {/* Corner sakura clusters hugging bottom-left & top-left */}
           {[
             { x: 34, y: 48, s: 1.1 },
             { x: 18, y: 82, s: 0.85 },
@@ -444,7 +516,7 @@ export const ThemeDiscBezel: React.FC<{ themeId: ThemeId }> = ({ themeId }) => {
 };
 
 /**
- * Full-viewport subtle architectural SVG border motifs framing every non-playing and playing screen.
+ * Full-viewport subtle architectural arch framing + pine/bell corner boughs + icicles & swaying gold stars.
  */
 export const ThemeCornerFraming: React.FC<{
   themeId: ThemeId;
@@ -457,60 +529,84 @@ export const ThemeCornerFraming: React.FC<{
       <div
         aria-hidden="true"
         className="pointer-events-none fixed inset-0 z-[8] overflow-hidden transition-opacity duration-300"
-        style={{ opacity: dimDuringPlay ? 0.55 : 0.96 }}
+        style={{ opacity: dimDuringPlay ? 0.52 : 0.96 }}
       >
-        {/* Top Arch Structural Timber & Hanging Gold Fairy Stars */}
-        <svg viewBox="0 0 1600 180" preserveAspectRatio="none" className="absolute inset-x-0 top-0 h-28 sm:h-36 w-full">
+        {/* Top Timber & Champagne-Gold Architectural Arch + Hanging Gold Stars */}
+        <svg viewBox="0 0 1600 200" preserveAspectRatio="none" className="absolute inset-x-0 top-0 h-32 sm:h-40 w-full">
           <defs>
             <linearGradient id="xmasArchGold" x1="0" y1="0" x2="1" y2="0">
-              <stop offset="0%" stopColor="#fde68a" stopOpacity="0.55" />
-              <stop offset="50%" stopColor="#fffbeb" stopOpacity="0.7" />
-              <stop offset="100%" stopColor="#fde68a" stopOpacity="0.55" />
+              <stop offset="0%" stopColor="#fde68a" stopOpacity="0.6" />
+              <stop offset="50%" stopColor="#fffbeb" stopOpacity="0.82" />
+              <stop offset="100%" stopColor="#fde68a" stopOpacity="0.6" />
             </linearGradient>
           </defs>
+          {/* Twin ornate upper canopy beams matching reference framing */}
+          <path
+            d="M0 105 Q 800 -36, 1600 105"
+            fill="none"
+            stroke="#160a14"
+            strokeWidth="12"
+            opacity="0.72"
+          />
+          <path
+            d="M0 105 Q 800 -36, 1600 105"
+            fill="none"
+            stroke="url(#xmasArchGold)"
+            strokeWidth="2.4"
+          />
           <path
             d="M0 68 Q 800 -18, 1600 68"
             fill="none"
             stroke="url(#xmasArchGold)"
-            strokeWidth="2.2"
+            strokeWidth="1.6"
+            opacity="0.75"
           />
-          {/* Swaying golden star ornaments along the upper arch */}
+
+          {/* Hanging golden 5-point stars along upper arch */}
           {[
-            { x: 110, len: 54, r: 9 },
-            { x: 245, len: 42, r: 7 },
-            { x: 1365, len: 44, r: 7 },
-            { x: 1495, len: 58, r: 10 },
+            { x: 118, len: 74, r: 10 },
+            { x: 256, len: 52, r: 7.5 },
+            { x: 1344, len: 52, r: 7.5 },
+            { x: 1482, len: 74, r: 10 },
           ].map((st, idx) => (
             <g key={idx}>
-              <line x1={st.x} y1={0} x2={st.x} y2={st.len} stroke="#fde68a" strokeWidth="1.4" opacity="0.75" />
+              <line x1={st.x} y1={0} x2={st.x} y2={st.len} stroke="#fde68a" strokeWidth="1.4" opacity="0.82" />
+              <circle cx={st.x} cy={st.len} r={st.r * 1.65} fill="rgba(253,224,71,0.22)" />
               <path
-                d={`M${st.x} ${st.len - st.r} L${st.x + st.r * 0.3} ${st.len - st.r * 0.3} L${st.x + st.r} ${st.len} L${st.x + st.r * 0.3} ${st.len + st.r * 0.3} L${st.x} ${st.len + st.r} L${st.x - st.r * 0.3} ${st.len + st.r * 0.3} L${st.x - st.r} ${st.len} L${st.x - st.r * 0.3} ${st.len - st.r * 0.3} Z`}
+                d={`M${st.x} ${st.len - st.r} L${st.x + st.r * 0.28} ${st.len - st.r * 0.28} L${st.x + st.r} ${st.len} L${st.x + st.r * 0.28} ${st.len + st.r * 0.28} L${st.x} ${st.len + st.r} L${st.x - st.r * 0.28} ${st.len + st.r * 0.28} L${st.x - st.r} ${st.len} L${st.x - st.r * 0.28} ${st.len - st.r * 0.28} Z`}
                 fill="#fffbeb"
               />
             </g>
           ))}
         </svg>
 
+        {/* Clean Snowy Icicles tucked beneath top corner arch beams (menus only) */}
+        {!dimDuringPlay && (
+          <>
+            <img
+              src={XMAS_SPRITES.icicles}
+              alt=""
+              className="hidden md:block absolute left-[12%] top-0 h-14 w-auto object-contain opacity-90 drop-shadow-[0_4px_12px_rgba(14,165,233,0.4)]"
+            />
+            <img
+              src={XMAS_SPRITES.icicles}
+              alt=""
+              className="hidden md:block absolute right-[12%] top-0 h-14 w-auto -scale-x-100 object-contain opacity-90 drop-shadow-[0_4px_12px_rgba(14,165,233,0.4)]"
+            />
+          </>
+        )}
+
         {/* Left & Right Evergreen Pine-and-Brass-Bell Boughs */}
         <img
           src={XMAS_SPRITES.boughBell}
           alt=""
-          className="absolute -left-6 -top-5 h-32 sm:h-44 w-auto object-contain -rotate-[12deg] drop-shadow-[0_6px_18px_rgba(0,0,0,0.7)]"
+          className="absolute -left-6 -top-5 h-32 sm:h-44 w-auto object-contain -rotate-[12deg] drop-shadow-[0_6px_18px_rgba(0,0,0,0.75)]"
         />
         <img
           src={XMAS_SPRITES.boughBell}
           alt=""
-          className="absolute -right-6 -top-5 h-32 sm:h-44 w-auto object-contain -scale-x-100 rotate-[12deg] drop-shadow-[0_6px_18px_rgba(0,0,0,0.7)]"
+          className="absolute -right-6 -top-5 h-32 sm:h-44 w-auto object-contain -scale-x-100 rotate-[12deg] drop-shadow-[0_6px_18px_rgba(0,0,0,0.75)]"
         />
-
-        {/* Lower Corner Wreaths (kept subtle on menus, hidden during play for stage clarity) */}
-        {!dimDuringPlay && (
-          <img
-            src={XMAS_SPRITES.wreath}
-            alt=""
-            className="hidden xl:block absolute -left-6 bottom-12 h-28 w-28 object-contain opacity-85 drop-shadow-[0_6px_16px_rgba(0,0,0,0.75)]"
-          />
-        )}
       </div>
     );
   }
@@ -518,7 +614,6 @@ export const ThemeCornerFraming: React.FC<{
   if (themeId === 'krampusnacht_2026') {
     return (
       <div aria-hidden="true" className="pointer-events-none fixed inset-0 z-[6] overflow-hidden transition-opacity duration-300" style={{ opacity }}>
-        {/* Draped forged chains top-left & top-right */}
         <svg viewBox="0 0 320 180" className="absolute left-0 top-0 h-40 w-64">
           <path d="M0 44 Q 110 112 240 0" fill="none" stroke="#1e293b" strokeWidth="8" strokeDasharray="14 6" />
           <path d="M0 44 Q 110 112 240 0" fill="none" stroke="#dc2626" strokeWidth="1.4" opacity="0.55" />
@@ -534,7 +629,6 @@ export const ThemeCornerFraming: React.FC<{
   if (themeId === 'neon_sakura') {
     return (
       <div aria-hidden="true" className="pointer-events-none fixed inset-0 z-[6] overflow-hidden transition-opacity duration-300" style={{ opacity }}>
-        {/* Hanging sakura silhouette branch upper corners + crisp pink neon circuit lines */}
         <svg viewBox="0 0 320 200" className="absolute left-0 top-0 h-44 w-72">
           <path d="M-8 12 Q 75 26 148 82" fill="none" stroke="#1e0b1e" strokeWidth="5" strokeLinecap="round" />
           {[

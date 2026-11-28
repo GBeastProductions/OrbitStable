@@ -80,18 +80,35 @@ export const RunSummaryModal: React.FC<RunSummaryModalProps> = ({
         className="max-h-[90dvh] w-full max-w-2xl overflow-y-auto orbit-scroll border shadow-2xl"
         style={{
           backgroundColor: 'var(--skin-surface, #0b0e16)',
-          borderColor: 'var(--skin-border, rgba(255,255,255,0.15))',
+          borderColor:
+            themeId === 'cozy_christmas_2026'
+              ? 'rgba(253, 230, 138, 0.6)'
+              : 'var(--skin-border, rgba(255,255,255,0.15))',
+          boxShadow:
+            themeId === 'cozy_christmas_2026'
+              ? '0 24px 64px rgba(0,0,0,0.88), 0 0 32px rgba(225,29,72,0.28)'
+              : undefined,
         }}
       >
         {/* Top Rank Header */}
         <div
           className="relative flex items-center justify-between gap-4 border-b px-6 py-5"
           style={{
-            backgroundColor: 'var(--skin-header, #121624)',
-            borderColor: 'var(--skin-border, rgba(255,255,255,0.12))',
+            background:
+              themeId === 'cozy_christmas_2026'
+                ? 'linear-gradient(90deg, rgba(46, 14, 26, 0.96), rgba(20, 12, 24, 0.96))'
+                : undefined,
+            backgroundColor:
+              themeId === 'cozy_christmas_2026'
+                ? undefined
+                : 'var(--skin-header, #121624)',
+            borderColor:
+              themeId === 'cozy_christmas_2026'
+                ? 'rgba(253, 230, 138, 0.42)'
+                : 'var(--skin-border, rgba(255,255,255,0.12))',
           }}
         >
-          <SkinBladeTrim themeId={themeId} featured />
+          <SkinBladeTrim themeId={themeId} featured accentVariant="bow_star" />
           <div className="min-w-0">
             <p className="text-xs font-bold uppercase tracking-[0.2em] text-[var(--accent-bright)]">
               {summary.cleared ? 'Stage Cleared · クリア' : `Stage Failed · ${summary.missReason || 'Missed'}`}

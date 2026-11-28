@@ -45,7 +45,9 @@ export const TopBar: React.FC<TopBarProps> = React.memo(
             backgroundColor: isChristmas ? undefined : 'var(--skin-header, rgba(8, 10, 17, 0.92))',
             borderBottomColor: isChristmas ? 'rgba(253, 224, 140, 0.45)' : 'var(--skin-border, rgba(255, 255, 255, 0.12))',
             borderTopColor: isChristmas ? '#fde68a' : 'var(--accent)',
-            boxShadow: '0 4px 24px rgba(0, 0, 0, 0.65)',
+            boxShadow: isChristmas
+              ? '0 4px 26px rgba(0, 0, 0, 0.72), inset 0 -1px 0 rgba(253, 230, 138, 0.25)'
+              : '0 4px 24px rgba(0, 0, 0, 0.65)',
           }}
         >
           {/* Subtle winter holly sprig framing corners during Christmas mode */}
@@ -84,6 +86,14 @@ export const TopBar: React.FC<TopBarProps> = React.memo(
             </button>
 
             <div className="hidden sm:flex items-center gap-2 min-w-0 truncate text-xs text-[#a1abbe]">
+              {isChristmas && (
+                <img
+                  src={XMAS_SPRITES.sparkleGold}
+                  alt=""
+                  aria-hidden="true"
+                  className="h-4 w-4 shrink-0 object-contain"
+                />
+              )}
               <span className="font-display font-bold text-white truncate max-w-[180px]">
                 {activeSong.title}
               </span>

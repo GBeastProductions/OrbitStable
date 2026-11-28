@@ -116,7 +116,9 @@ export interface DevDockStyleConfig {
 
 export interface CustomDecorWidget {
   id: string;
-  screen: 'TITLE' | 'SONG_SELECT' | 'PLAYING' | 'ALL';
+  screen: ScreenView | 'ALL';
+  themeId?: ThemeId | 'ALL';
+  zLayer?: 'background' | 'midground' | 'foreground';
   kind: 'image' | 'badge';
   text?: string;
   imageUrl?: string;
@@ -124,9 +126,12 @@ export interface CustomDecorWidget {
   yPct: number;
   widthPx: number;
   heightPx: number;
+  scale?: number;
+  flipX?: boolean;
+  locked?: boolean;
   opacity: number;
   rotationDeg: number;
-  blendMode?: 'screen' | 'normal';
+  blendMode?: 'screen' | 'lighten' | 'normal';
 }
 
 export interface PublishedHudLayout {

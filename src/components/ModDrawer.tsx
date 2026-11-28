@@ -48,20 +48,34 @@ export const ModDrawer: React.FC<ModDrawerProps> = React.memo(
         aria-modal="true"
         aria-labelledby="modDrawerTitle"
         aria-hidden={!open}
-        className={`fixed bottom-0 left-1/2 z-50 flex max-h-[82dvh] w-[min(96vw,920px)] flex-col border-t-2 border-[var(--accent-bright)] shadow-2xl backdrop-blur-md transition-transform duration-200 ease-out ${
+        className={`fixed bottom-0 left-1/2 z-50 flex max-h-[82dvh] w-[min(96vw,920px)] flex-col border-t-2 shadow-2xl backdrop-blur-md transition-transform duration-200 ease-out ${
           open
             ? '-translate-x-1/2 translate-y-0'
             : '-translate-x-1/2 translate-y-[104%] pointer-events-none'
         }`}
-        style={{ backgroundColor: 'var(--skin-surface, rgba(11, 14, 22, 0.98))' }}
+        style={{
+          backgroundColor: 'var(--skin-surface, rgba(11, 14, 22, 0.98))',
+          borderTopColor:
+            themeId === 'cozy_christmas_2026' ? '#fde68a' : 'var(--accent-bright)',
+        }}
       >
         {open && (
           <>
             <div
               className="relative flex flex-wrap items-center justify-between gap-3 border-b px-6 py-4"
               style={{
-                backgroundColor: 'var(--skin-header, #121624)',
-                borderColor: 'var(--skin-border, rgba(255,255,255,0.12))',
+                background:
+                  themeId === 'cozy_christmas_2026'
+                    ? 'linear-gradient(90deg, rgba(46, 14, 26, 0.96), rgba(20, 12, 24, 0.96))'
+                    : undefined,
+                backgroundColor:
+                  themeId === 'cozy_christmas_2026'
+                    ? undefined
+                    : 'var(--skin-header, #121624)',
+                borderColor:
+                  themeId === 'cozy_christmas_2026'
+                    ? 'rgba(253, 230, 138, 0.42)'
+                    : 'var(--skin-border, rgba(255,255,255,0.12))',
               }}
             >
               <SkinBladeTrim themeId={themeId} compact />

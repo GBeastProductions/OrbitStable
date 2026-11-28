@@ -86,6 +86,7 @@ import {
 import {
   BeatmapNote,
   BgFxMode,
+  CustomDecorWidget,
   DevAssetItem,
   DifficultyId,
   EditableThemePayload,
@@ -247,10 +248,17 @@ export default function App() {
     assets: DevAssetItem[];
   }>({ songs: [], themes: [], hudLayouts: [], assets: [] });
   const [studioDrafts, setStudioDrafts] = useState<LocalStudioDraftBundle>(() => loadStudioDrafts());
+  const studioDraftsRef = useRef(studioDrafts);
+  studioDraftsRef.current = studioDrafts;
+  const draftHistoryPastRef = useRef<LocalStudioDraftBundle[]>([]);
+  const draftHistoryFutureRef = useRef<LocalStudioDraftBundle[]>([]);
+  const [historyCounts, setHistoryCounts] = useState({ past: 0, future: 0 });
+  const lastHistoryPushMsRef = useRef(0);
   const [devStudioOpen, setDevStudioOpen] = useState(false);
   const [devActiveTab, setDevActiveTab] = useState<DevToolTabId>('overdrive');
   const [hudEditModeActive, setHudEditModeActive] = useState(false);
   const [selectedHudWidgetId, setSelectedHudWidgetId] = useState<string | null>(null);
+  const [selectedDecorId, setSelectedDecorId] = useState<string | null>(null);
   const [odPreviewCharge, setOdPreviewCharge] = useState<number | null>(null);
   const [odPreviewActive, setOdPreviewActive] = useState(false);
 
@@ -3653,47 +3661,133 @@ export default function App() {
     [updateProfile],
   );
 
-  // Axiom Dev Studio Handlers
-  const handleSaveThemeDraft = useCallback((theme: EditableThemePayload) => {
-    setStudioDrafts((prev) => ({
-      ...prev,
-      draftThemes: {
-        ...prev.draftThemes,
-        [theme.id]: { ...theme, status: 'draft' },
-      },
-    }));
-  }, []);
+  // Axiom Dev Studio Handlers + Undo/Redo History
+  const commitStudioDrafts = useCallback(
+    (updater: (prev: LocalStudioDraftBundle) => LocalStudioDraftBundle, coalesceMs = 0) => {
+      const prev = studioDraftsRef.current;
+      const next = updater(prev);
+      if (next === prev) return;
+      const nowMs = Date.now();
+      const shouldCoalesce =
+        coalesceMs > 0 &&
+        draftHistoryPastRef.current.length > 0 &&
+        nowMs - lastHistoryPushMsRef.current < coalesceMs;
+      if (!shouldCoalesce) {
+        draftHistoryPastRef.current = [...draftHistoryPastRef.current.slice(-39), prev];
+        lastHistoryPushMsRef.current = nowMs;
+      }
+      draftHistoryFutureRef.current = [];
+      setHistoryCounts({
+        past: draftHistoryPastRef.current.length,
+        future: 0,
+      });
+      setStudioDrafts(next);
+    },
+    [],
+  );
 
-  const handleResetBuiltInTheme = useCallback((id: ThemeId) => {
-    setStudioDrafts((prev) => {
-      const nextThemes = { ...prev.draftThemes };
-      delete nextThemes[id];
-      return { ...prev, draftThemes: nextThemes };
+  const handleUndoDraft = useCallback(() => {
+    if (draftHistoryPastRef.current.length === 0) return;
+    const past = draftHistoryPastRef.current;
+    const previous = past[past.length - 1];
+    draftHistoryPastRef.current = past.slice(0, -1);
+    draftHistoryFutureRef.current = [
+      ...draftHistoryFutureRef.current.slice(-39),
+      studioDraftsRef.current,
+    ];
+    lastHistoryPushMsRef.current = 0;
+    setHistoryCounts({
+      past: draftHistoryPastRef.current.length,
+      future: draftHistoryFutureRef.current.length,
     });
-    const base = buildEditableThemeFromBuiltIn(id);
-    setStudioDrafts((prev) => ({
-      ...prev,
-      draftThemes: {
-        ...prev.draftThemes,
-        [id]: { ...base, status: 'draft' },
-      },
-    }));
+    setStudioDrafts(previous);
   }, []);
 
-  const handleSaveSongDraft = useCallback((song: SongDefinition) => {
-    audioEngine.clearBufferedSong(song.id);
-    setStudioDrafts((prev) => ({
-      ...prev,
-      draftSongs: {
-        ...prev.draftSongs,
-        [song.id]: { ...song, status: 'draft' },
-      },
-    }));
+  const handleRedoDraft = useCallback(() => {
+    if (draftHistoryFutureRef.current.length === 0) return;
+    const future = draftHistoryFutureRef.current;
+    const next = future[future.length - 1];
+    draftHistoryFutureRef.current = future.slice(0, -1);
+    draftHistoryPastRef.current = [
+      ...draftHistoryPastRef.current.slice(-39),
+      studioDraftsRef.current,
+    ];
+    lastHistoryPushMsRef.current = 0;
+    setHistoryCounts({
+      past: draftHistoryPastRef.current.length,
+      future: draftHistoryFutureRef.current.length,
+    });
+    setStudioDrafts(next);
   }, []);
+
+  useEffect(() => {
+    if (!isDeveloper || !devStudioOpen) return;
+    const onUndoRedoKeyDown = (e: KeyboardEvent) => {
+      const targetTag = (e.target as HTMLElement)?.tagName;
+      if (targetTag === 'INPUT' || targetTag === 'TEXTAREA' || targetTag === 'SELECT') return;
+      if ((e.metaKey || e.ctrlKey) && e.code === 'KeyZ') {
+        e.preventDefault();
+        if (e.shiftKey) handleRedoDraft();
+        else handleUndoDraft();
+      } else if ((e.metaKey || e.ctrlKey) && e.code === 'KeyY') {
+        e.preventDefault();
+        handleRedoDraft();
+      }
+    };
+    window.addEventListener('keydown', onUndoRedoKeyDown);
+    return () => window.removeEventListener('keydown', onUndoRedoKeyDown);
+  }, [devStudioOpen, handleRedoDraft, handleUndoDraft, isDeveloper]);
+
+  const handleSaveThemeDraft = useCallback(
+    (theme: EditableThemePayload) => {
+      commitStudioDrafts(
+        (prev) => ({
+          ...prev,
+          draftThemes: {
+            ...prev.draftThemes,
+            [theme.id]: { ...theme, status: 'draft' },
+          },
+        }),
+        400,
+      );
+    },
+    [commitStudioDrafts],
+  );
+
+  const handleResetBuiltInTheme = useCallback(
+    (id: ThemeId) => {
+      const base = buildEditableThemeFromBuiltIn(id);
+      commitStudioDrafts((prev) => ({
+        ...prev,
+        draftThemes: {
+          ...prev.draftThemes,
+          [id]: { ...base, status: 'draft' },
+        },
+      }));
+    },
+    [commitStudioDrafts],
+  );
+
+  const handleSaveSongDraft = useCallback(
+    (song: SongDefinition) => {
+      audioEngine.clearBufferedSong(song.id);
+      commitStudioDrafts(
+        (prev) => ({
+          ...prev,
+          draftSongs: {
+            ...prev.draftSongs,
+            [song.id]: { ...song, status: 'draft' },
+          },
+        }),
+        400,
+      );
+    },
+    [commitStudioDrafts],
+  );
 
   const handlePlaytestSong = useCallback(
     (song: SongDefinition, startOffsetSec = 0) => {
-      setStudioDrafts((prev) => ({
+      commitStudioDrafts((prev) => ({
         ...prev,
         draftSongs: {
           ...prev.draftSongs,
@@ -3718,38 +3812,48 @@ export default function App() {
         );
       }, 30);
     },
-    [resetRound, updateProfile],
+    [commitStudioDrafts, resetRound, updateProfile],
   );
 
-  const handleUpdateHudLayout = useCallback((next: PublishedHudLayout) => {
-    setStudioDrafts((prev) => ({
-      ...prev,
-      draftHudLayout: { ...next, status: 'draft' },
-    }));
-  }, []);
+  const handleUpdateHudLayout = useCallback(
+    (next: PublishedHudLayout) => {
+      commitStudioDrafts(
+        (prev) => ({
+          ...prev,
+          draftHudLayout: { ...next, status: 'draft' },
+        }),
+        450,
+      );
+    },
+    [commitStudioDrafts],
+  );
 
   const handleSafeResetLayout = useCallback(() => {
     setHudEditModeActive(false);
     setSelectedHudWidgetId(null);
-    setStudioDrafts((prev) => ({
+    setSelectedDecorId(null);
+    commitStudioDrafts((prev) => ({
       ...prev,
       draftHudLayout: { ...DEFAULT_HUD_LAYOUT, status: 'draft' },
     }));
-  }, []);
+  }, [commitStudioDrafts]);
 
-  const handleUpsertAsset = useCallback((asset: DevAssetItem) => {
-    setStudioDrafts((prev) => ({
-      ...prev,
-      draftAssets: {
-        ...prev.draftAssets,
-        [asset.id]: { ...asset, status: 'draft' },
-      },
-    }));
-  }, []);
+  const handleUpsertAsset = useCallback(
+    (asset: DevAssetItem) => {
+      commitStudioDrafts((prev) => ({
+        ...prev,
+        draftAssets: {
+          ...prev.draftAssets,
+          [asset.id]: { ...asset, status: 'draft' },
+        },
+      }));
+    },
+    [commitStudioDrafts],
+  );
 
   const handleDeleteAsset = useCallback(
     (assetId: string) => {
-      setStudioDrafts((prev) => {
+      commitStudioDrafts((prev) => {
         const nextAssets = { ...prev.draftAssets };
         delete nextAssets[assetId];
         return { ...prev, draftAssets: nextAssets };
@@ -3763,7 +3867,7 @@ export default function App() {
         });
       }
     },
-    [isDeveloper, publishedCatalog.assets],
+    [commitStudioDrafts, isDeveloper, publishedCatalog.assets],
   );
 
   const handlePublishAllCloud = useCallback(async (): Promise<string> => {
@@ -3797,6 +3901,9 @@ export default function App() {
     const refreshed = await fetchLivePublishedCatalog(firebaseUser);
     setPublishedCatalog(refreshed);
     clearStudioDrafts();
+    draftHistoryPastRef.current = [];
+    draftHistoryFutureRef.current = [];
+    setHistoryCounts({ past: 0, future: 0 });
     setStudioDrafts({ draftSongs: {}, draftThemes: {}, draftHudLayout: null, draftAssets: {} });
 
     return skippedAssets > 0
@@ -3806,8 +3913,13 @@ export default function App() {
 
   const handleDiscardDrafts = useCallback(() => {
     clearStudioDrafts();
-    setStudioDrafts({ draftSongs: {}, draftThemes: {}, draftHudLayout: null, draftAssets: {} });
-  }, []);
+    commitStudioDrafts(() => ({
+      draftSongs: {},
+      draftThemes: {},
+      draftHudLayout: null,
+      draftAssets: {},
+    }));
+  }, [commitStudioDrafts]);
 
   const handleUpdateWidgetOffsetFromOverlay = useCallback(
     (widgetId: string, xOffsetPx: number, yOffsetPx: number) => {
@@ -3831,17 +3943,62 @@ export default function App() {
     [handleUpdateHudLayout, mergedHudLayout],
   );
 
-  const handleUpdateDecorPosFromOverlay = useCallback(
-    (decorId: string, xPct: number, yPct: number) => {
+  const handleUpdateDecorFromOverlay = useCallback(
+    (decorId: string, patch: Partial<CustomDecorWidget>) => {
       const cur = mergedHudLayout;
       handleUpdateHudLayout({
         ...cur,
         customDecorWidgets: (cur.customDecorWidgets || []).map((d) =>
-          d.id === decorId ? { ...d, xPct, yPct } : d,
+          d.id === decorId ? { ...d, ...patch } : d,
         ),
       });
     },
     [handleUpdateHudLayout, mergedHudLayout],
+  );
+
+  const handleUpdateDecorPosFromOverlay = useCallback(
+    (decorId: string, xPct: number, yPct: number) => {
+      handleUpdateDecorFromOverlay(decorId, { xPct, yPct });
+    },
+    [handleUpdateDecorFromOverlay],
+  );
+
+  const handlePlaceDecorFromAsset = useCallback(
+    (asset: DevAssetItem) => {
+      const newId = `decor_${Date.now().toString().slice(-6)}`;
+      const item: CustomDecorWidget = {
+        id: newId,
+        screen: screenRef.current || 'ALL',
+        themeId: profileRef.current.theme,
+        zLayer: 'foreground',
+        kind: 'image',
+        imageUrl: asset.dataUrlOrPath,
+        text: asset.name,
+        xPct: 50,
+        yPct: 45,
+        widthPx: 180,
+        heightPx: 180,
+        scale: 1,
+        flipX: false,
+        locked: false,
+        opacity: 1,
+        rotationDeg: 0,
+        blendMode: 'normal',
+      };
+      const cur = mergedHudLayout;
+      commitStudioDrafts(() => ({
+        ...studioDraftsRef.current,
+        draftHudLayout: {
+          ...cur,
+          status: 'draft',
+          customDecorWidgets: [...(cur.customDecorWidgets || []), item],
+        },
+      }));
+      setSelectedDecorId(newId);
+      setDevActiveTab('layout');
+      setHudEditModeActive(true);
+    },
+    [commitStudioDrafts, mergedHudLayout],
   );
 
   const activeSong = getActiveSong();
@@ -3898,11 +4055,15 @@ export default function App() {
       value={{
         widgets: mergedHudLayout.widgets,
         customDecorWidgets: mergedHudLayout.customDecorWidgets || [],
+        activeThemeId: profile.theme,
         editModeActive: isDeveloper && hudEditModeActive,
         selectedWidgetId: selectedHudWidgetId,
+        selectedDecorId,
         onSelectWidget: setSelectedHudWidgetId,
+        onSelectDecor: setSelectedDecorId,
         onUpdateWidgetOffset: handleUpdateWidgetOffsetFromOverlay,
         onUpdateDecorPos: handleUpdateDecorPosFromOverlay,
+        onUpdateDecor: handleUpdateDecorFromOverlay,
         themesMap: mergedThemes,
       }}
     >
@@ -3924,7 +4085,7 @@ export default function App() {
         dimDuringPlay={screen === 'PLAYING'}
       />
 
-      <CustomDecorLayer screen={screen} />
+      <CustomDecorLayer screen={screen} activeThemeId={profile.theme} />
 
       {screen === 'TITLE' && (
         <TitleScreen
@@ -4350,6 +4511,7 @@ export default function App() {
           assets={mergedAssets}
           editModeActive={hudEditModeActive}
           selectedWidgetId={selectedHudWidgetId}
+          selectedDecorId={selectedDecorId}
           previewCharge={odPreviewCharge}
           previewActive={odPreviewActive}
           draftSongsCount={Object.keys(studioDrafts.draftSongs).length}
@@ -4358,8 +4520,13 @@ export default function App() {
           draftAssetsCount={Object.keys(studioDrafts.draftAssets).length}
           exportSongs={Object.values(studioDrafts.draftSongs)}
           exportThemes={Object.values(studioDrafts.draftThemes)}
+          canUndo={historyCounts.past > 0}
+          canRedo={historyCounts.future > 0}
+          onUndo={handleUndoDraft}
+          onRedo={handleRedoDraft}
           onToggleEditMode={() => setHudEditModeActive((v) => !v)}
           onSelectWidget={setSelectedHudWidgetId}
+          onSelectDecor={setSelectedDecorId}
           onUpdateHudLayout={handleUpdateHudLayout}
           onSafeResetLayout={handleSafeResetLayout}
           onSaveThemeDraft={handleSaveThemeDraft}
@@ -4370,6 +4537,7 @@ export default function App() {
           onPlaytestSong={handlePlaytestSong}
           onUpsertAsset={handleUpsertAsset}
           onDeleteAsset={handleDeleteAsset}
+          onPlaceDecorFromAsset={handlePlaceDecorFromAsset}
           onChangePreviewCharge={setOdPreviewCharge}
           onTogglePreviewActive={setOdPreviewActive}
           onPublishAllCloud={handlePublishAllCloud}
